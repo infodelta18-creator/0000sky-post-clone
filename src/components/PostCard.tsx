@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Repeat2, Share, Bookmark, BookmarkCheck, Quote } from "lucide-react";
+import { Heart, MessageCircle, Repeat2, Share2, Bookmark, BookmarkCheck, Quote } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { timeAgo } from "@/lib/time";
 import { useNavigate } from "react-router-dom";
