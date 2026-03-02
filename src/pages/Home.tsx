@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { X, TrendingUp } from "lucide-react";
+import { X, TrendingUp, ArrowUp, Loader2 } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -18,8 +18,56 @@ export default function Home() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerAutoImage, setComposerAutoImage] = useState(false);
   const [showTopics, setShowTopics] = useState(true);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isPulling, setIsPulling] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Back to top: track scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 600);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Pull to refresh
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (window.scrollY <= 0) {
+      touchStartY.current = e.touches[0].clientY;
+      setIsPulling(true);
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isPulling) return;
+    const diff = e.touches[0].clientY - touchStartY.current;
+    if (diff > 0 && window.scrollY <= 0) {
+      setPullDistance(Math.min(diff * 0.4, 80));
+    }
+  }, [isPulling]);
+
+  const handleTouchEnd = useCallback(async () => {
+    if (pullDistance > 60) {
+      setIsRefreshing(true);
+      setPullDistance(50);
+      await queryClient.invalidateQueries({ queryKey: ["posts", tab] });
+      await queryClient.invalidateQueries({ queryKey: ["home_trending_topics"] });
+      setIsRefreshing(false);
+    }
+    setPullDistance(0);
+    setIsPulling(false);
+  }, [pullDistance, queryClient, tab]);
 
   // Trending topics from actual post content (extract top words)
   const { data: trendingTopics = [] } = useQuery({
@@ -32,7 +80,6 @@ export default function Home() {
         .order("created_at", { ascending: false })
         .limit(100);
       if (!data) return [];
-      // Extract hashtags and common words
       const wordMap: Record<string, number> = {};
       data.forEach((p) => {
         const hashtags = p.content.match(/#(\w+)/g);
@@ -43,7 +90,6 @@ export default function Home() {
           });
         }
       });
-      // If no hashtags, show default categories from feeds
       if (Object.keys(wordMap).length === 0) {
         return ["Technology", "Sports", "Politics", "Entertainment", "Science", "Gaming", "Music", "Art"];
       }
@@ -81,7 +127,6 @@ export default function Home() {
       const { data } = await query;
       if (!data) return [];
 
-      // Filter out hidden posts, muted threads, muted/blocked authors
       let filtered = data;
       if (user) {
         const [hiddenRes, mutedThreadsRes, mutedAccRes, blockedRes] = await Promise.all([
@@ -142,7 +187,6 @@ export default function Home() {
         };
       });
 
-      // "What's Hot" tab: sort by engagement (likes + reposts + replies)
       if (tab === "whats-hot") {
         result.sort((a, b) => (b.likeCount + b.repostCount + b.replyCount) - (a.likeCount + a.repostCount + a.replyCount));
       }
@@ -152,39 +196,58 @@ export default function Home() {
   });
 
   return (
-    <div className="flex flex-col">
-      {/* Tabs */}
+    <div
+      ref={containerRef}
+      className="flex flex-col"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Sticky: tabs only */}
       <div className="sticky top-[49px] lg:top-0 z-20 bg-background/95 backdrop-blur-sm">
         <div className="flex w-full items-center justify-between border-b border-border px-4">
           <TabButton label="Discover" active={tab === "discover"} onClick={() => setTab("discover")} />
           <TabButton label="Following" active={tab === "following"} onClick={() => setTab("following")} />
           <TabButton label="What's Hot Classic" active={tab === "whats-hot"} onClick={() => setTab("whats-hot")} />
         </div>
-
-        {/* Trending topics row - only on Discover tab */}
-        {tab === "discover" && showTopics && trendingTopics.length > 0 && (
-          <div className="flex items-center border-b border-border">
-            <ScrollArea className="flex-1">
-              <div className="flex items-center gap-0.5 px-2 py-2">
-                <TrendingUp className="h-4 w-4 text-primary flex-shrink-0 mx-1" />
-                {trendingTopics.map((topic) => (
-                  <button
-                    key={topic}
-                    onClick={() => navigate(`/search?q=${encodeURIComponent(topic)}`)}
-                    className="whitespace-nowrap rounded-full px-3 py-1 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
-                  >
-                    {topic}
-                  </button>
-                ))}
-              </div>
-              <ScrollBar orientation="horizontal" className="h-0" />
-            </ScrollArea>
-            <button onClick={() => setShowTopics(false)} className="flex-shrink-0 p-2 text-muted-foreground hover:text-foreground">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Pull to refresh indicator */}
+      {(pullDistance > 0 || isRefreshing) && (
+        <div
+          className="flex items-center justify-center overflow-hidden transition-all"
+          style={{ height: isRefreshing ? 50 : pullDistance }}
+        >
+          <Loader2
+            className={`h-5 w-5 text-primary ${isRefreshing ? "animate-spin" : ""}`}
+            style={{ opacity: Math.min(pullDistance / 60, 1), transform: `rotate(${pullDistance * 3}deg)` }}
+          />
+        </div>
+      )}
+
+      {/* Trending topics row - scrolls with content, NOT sticky */}
+      {tab === "discover" && showTopics && trendingTopics.length > 0 && (
+        <div className="flex items-center border-b border-border">
+          <ScrollArea className="flex-1">
+            <div className="flex items-center gap-0.5 px-2 py-2">
+              <TrendingUp className="h-4 w-4 text-primary flex-shrink-0 mx-1" />
+              {trendingTopics.map((topic) => (
+                <button
+                  key={topic}
+                  onClick={() => navigate(`/search?q=${encodeURIComponent(topic)}`)}
+                  className="whitespace-nowrap rounded-full px-3 py-1 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
+                >
+                  {topic}
+                </button>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" className="h-0" />
+          </ScrollArea>
+          <button onClick={() => setShowTopics(false)} className="flex-shrink-0 p-2 text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* Composer prompt */}
       <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border">
@@ -222,6 +285,17 @@ export default function Home() {
       )}
 
       <Composer open={composerOpen} onOpenChange={(v) => { setComposerOpen(v); if (!v) setComposerAutoImage(false); }} autoOpenImagePicker={composerAutoImage} />
+
+      {/* Back to top button - left side */}
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-20 left-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 active:scale-95 lg:bottom-6 lg:left-[calc(50%-340px)]"
+          aria-label="Back to top"
+        >
+          <ArrowUp className="h-5 w-5" />
+        </button>
+      )}
     </div>
   );
 }
