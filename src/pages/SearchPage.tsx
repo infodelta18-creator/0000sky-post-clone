@@ -416,13 +416,15 @@ export default function SearchPage() {
     <MobileDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
     <div className="flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="flex items-center gap-2 px-4 py-2.5">
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm">
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border">
           <button onClick={() => setDrawerOpen(true)} className="p-1 lg:hidden">
-            <Menu className="h-5 w-5 text-foreground flex-shrink-0" />
+            <Menu className="h-6 w-6 text-foreground flex-shrink-0" />
           </button>
-          <h2 className="text-lg font-bold lg:hidden flex-shrink-0 mr-1">Explore</h2>
-          <div className="relative flex-1">
+          <h2 className="text-xl font-bold">Explore</h2>
+        </div>
+        <div className="px-4 py-2.5 border-b border-border">
+          <div className="relative">
             <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search for posts, users, or feeds"
