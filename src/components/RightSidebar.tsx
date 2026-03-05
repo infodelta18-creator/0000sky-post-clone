@@ -8,32 +8,23 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useTranslation } from "@/i18n/LanguageContext";
 
 export default function RightSidebar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  // Trending: top hashtags / most-liked posts in last 7 days
   const { data: trendingPosts = [] } = useQuery({
     queryKey: ["trending_sidebar"],
     queryFn: async () => {
-      // Get posts with most likes
-      const { data: likes } = await supabase
-        .from("likes")
-        .select("post_id")
-        .gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString());
+      const { data: likes } = await supabase.from("likes").select("post_id").gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString());
       if (!likes || likes.length === 0) return [];
-
       const counts: Record<string, number> = {};
       likes.forEach((l) => { counts[l.post_id] = (counts[l.post_id] || 0) + 1; });
       const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
       const topIds = sorted.map(([id]) => id);
-
-      const { data: posts } = await supabase
-        .from("posts")
-        .select("id, content")
-        .in("id", topIds);
-
+      const { data: posts } = await supabase.from("posts").select("id, content").in("id", topIds);
       return sorted.map(([id, count]) => {
         const post = posts?.find((p) => p.id === id);
         const words = (post?.content || "").split(/\s+/).slice(0, 5).join(" ");
@@ -43,22 +34,15 @@ export default function RightSidebar() {
     staleTime: 120000,
   });
 
-  // Suggested users: random profiles the user doesn't follow
   const { data: suggestedUsers = [] } = useQuery({
     queryKey: ["suggested_users", user?.id],
     queryFn: async () => {
       if (!user) return [];
       const { data: following } = await supabase.from("follows").select("following_id").eq("follower_id", user.id);
       const followingIds = new Set((following || []).map((f) => f.following_id));
-      followingIds.add(user.id); // exclude self
-
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, username, display_name, avatar_url")
-        .limit(20);
-
+      followingIds.add(user.id);
+      const { data: profiles } = await supabase.from("profiles").select("id, username, display_name, avatar_url").limit(20);
       const candidates = (profiles || []).filter((p) => !followingIds.has(p.id));
-      // Shuffle and take 3
       return candidates.sort(() => Math.random() - 0.5).slice(0, 3);
     },
     enabled: !!user,
@@ -68,78 +52,52 @@ export default function RightSidebar() {
   const handleFollow = async (userId: string) => {
     if (!user) return;
     const { error } = await supabase.from("follows").insert({ follower_id: user.id, following_id: userId });
-    if (error?.code === "23505") { toast.info("Already following"); return; }
+    if (error?.code === "23505") { toast.info(t("sidebar.already_following")); return; }
     if (error) { toast.error("Failed to follow"); return; }
-    // Create follow notification
     if (userId !== user.id) {
-      await supabase.from("notifications").insert({
-        user_id: userId, actor_id: user.id, type: "follow",
-      });
+      await supabase.from("notifications").insert({ user_id: userId, actor_id: user.id, type: "follow" });
     }
-    toast.success("Followed!");
+    toast.success(t("sidebar.followed"));
   };
 
   return (
     <aside className="sticky top-0 hidden h-screen w-[320px] flex-col gap-4 overflow-y-auto py-4 pl-6 xl:flex">
-      {/* Search */}
       <div className="relative" onClick={() => navigate("/search")}>
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search"
-          className="rounded-full border-border bg-secondary pl-9 focus-visible:ring-primary cursor-pointer"
-          readOnly
-        />
+        <Input placeholder={t("sidebar.search")} className="rounded-full border-border bg-secondary pl-9 focus-visible:ring-primary cursor-pointer" readOnly />
       </div>
-
-      {/* Trending */}
       <div className="rounded-2xl bg-secondary p-4">
         <h3 className="mb-3 flex items-center gap-2 text-lg font-bold">
-          <TrendingUp className="h-5 w-5" />
-          What's Hot
+          <TrendingUp className="h-5 w-5" /> {t("sidebar.whats_hot")}
         </h3>
         <div className="space-y-3">
-          {trendingPosts.length > 0 ? (
-            trendingPosts.map((topic) => (
-              <div
-                key={topic.id}
-                onClick={() => navigate(`/post/${topic.id}`)}
-                className="cursor-pointer transition-colors bsky-hover rounded-lg p-2 -mx-2"
-              >
-                <p className="text-sm font-semibold truncate">{topic.label}</p>
-                <p className="text-xs text-muted-foreground">{topic.count} likes</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-xs text-muted-foreground">No trending posts yet</p>
+          {trendingPosts.length > 0 ? trendingPosts.map((topic) => (
+            <div key={topic.id} onClick={() => navigate(`/post/${topic.id}`)} className="cursor-pointer transition-colors bsky-hover rounded-lg p-2 -mx-2">
+              <p className="text-sm font-semibold truncate">{topic.label}</p>
+              <p className="text-xs text-muted-foreground">{topic.count} {t("common.likes")}</p>
+            </div>
+          )) : (
+            <p className="text-xs text-muted-foreground">{t("sidebar.no_trending")}</p>
           )}
         </div>
       </div>
-
-      {/* Suggested */}
       <div className="rounded-2xl bg-secondary p-4">
-        <h3 className="mb-3 text-lg font-bold">Suggested for you</h3>
+        <h3 className="mb-3 text-lg font-bold">{t("sidebar.suggested")}</h3>
         <div className="space-y-3">
-          {suggestedUsers.length > 0 ? (
-            suggestedUsers.map((u: any) => (
-              <div key={u.id} className="flex items-center gap-3">
-                <Avatar className="h-9 w-9 cursor-pointer" onClick={() => navigate(`/profile/${u.username}`)}>
-                  <AvatarImage src={u.avatar_url} />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">{u.display_name?.[0]?.toUpperCase() || "?"}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1 cursor-pointer" onClick={() => navigate(`/profile/${u.username}`)}>
-                  <p className="truncate text-sm font-semibold flex items-center gap-1">
-                    {u.display_name}
-                    <VerifiedBadge userId={u.id} className="h-3.5 w-3.5" />
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">@{u.username}</p>
-                </div>
-                <Button size="sm" variant="outline" className="h-8 rounded-full text-xs font-semibold" onClick={() => handleFollow(u.id)}>
-                  Follow
-                </Button>
+          {suggestedUsers.length > 0 ? suggestedUsers.map((u: any) => (
+            <div key={u.id} className="flex items-center gap-3">
+              <Avatar className="h-9 w-9 cursor-pointer" onClick={() => navigate(`/profile/${u.username}`)}>
+                <AvatarImage src={u.avatar_url} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">{u.display_name?.[0]?.toUpperCase() || "?"}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1 cursor-pointer" onClick={() => navigate(`/profile/${u.username}`)}>
+                <p className="truncate text-sm font-semibold flex items-center gap-1">{u.display_name}<VerifiedBadge userId={u.id} className="h-3.5 w-3.5" /></p>
+                <p className="truncate text-xs text-muted-foreground">@{u.username}</p>
               </div>
-            ))
-          ) : (
-            <p className="text-xs text-muted-foreground">No suggestions available</p>
+              <Button size="sm" variant="outline" className="h-8 rounded-full text-xs font-semibold" onClick={() => handleFollow(u.id)}>{t("common.follow")}</Button>
+            </div>
+          )) : (
+            <p className="text-xs text-muted-foreground">{t("sidebar.no_suggestions")}</p>
           )}
         </div>
       </div>

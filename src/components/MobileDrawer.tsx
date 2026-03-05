@@ -9,18 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
-
-const drawerNavItems = [
-  { label: "Explore", path: "/search", icon: Search },
-  { label: "Home", path: "/", icon: Home },
-  { label: "Chat", path: "/messages", icon: MessageCircle },
-  { label: "Notifications", path: "/notifications", icon: Bell },
-  { label: "Feeds", path: "/feeds", icon: Hash },
-  { label: "Lists", path: "/lists", icon: List },
-  { label: "Saved", path: "/saved", icon: Bookmark },
-  { label: "Profile", path: "/profile", icon: User },
-  { label: "Settings", path: "/settings", icon: Settings },
-];
+import { useTranslation } from "@/i18n/LanguageContext";
 
 interface MobileDrawerProps {
   open: boolean;
@@ -33,6 +22,19 @@ export default function MobileDrawer({ open, onOpenChange }: MobileDrawerProps) 
   const isDark = resolvedTheme === "dark";
   const { isStaff, isAdmin } = useRole();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const drawerNavItems = [
+    { label: t("nav.explore"), path: "/search", icon: Search },
+    { label: t("nav.home"), path: "/", icon: Home },
+    { label: t("nav.chat"), path: "/messages", icon: MessageCircle },
+    { label: t("nav.notifications"), path: "/notifications", icon: Bell },
+    { label: t("nav.feeds"), path: "/feeds", icon: Hash },
+    { label: t("nav.lists"), path: "/lists", icon: List },
+    { label: t("nav.saved"), path: "/saved", icon: Bookmark },
+    { label: t("nav.profile"), path: "/profile", icon: User },
+    { label: t("nav.settings"), path: "/settings", icon: Settings },
+  ];
 
   const handleLogout = async () => {
     onOpenChange(false);
@@ -61,13 +63,10 @@ export default function MobileDrawer({ open, onOpenChange }: MobileDrawerProps) 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[300px] p-0 flex flex-col">
-        {/* Profile header - compact */}
         <div className="flex items-center gap-3 px-4 pt-4 pb-3">
           <Avatar className="h-10 w-10">
             <AvatarImage src={profile?.avatar_url || ""} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-              {profile?.display_name?.[0]?.toUpperCase() || "?"}
-            </AvatarFallback>
+            <AvatarFallback className="bg-primary text-primary-foreground text-sm">{profile?.display_name?.[0]?.toUpperCase() || "?"}</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-foreground truncate flex items-center gap-1">
@@ -76,86 +75,65 @@ export default function MobileDrawer({ open, onOpenChange }: MobileDrawerProps) 
             </p>
             <p className="text-xs text-muted-foreground truncate">@{profile?.username || "handle"}</p>
             <p className="text-xs mt-0.5">
-              <span className="font-bold text-foreground">{followerCount}</span> <span className="text-muted-foreground">followers</span>
+              <span className="font-bold text-foreground">{followerCount}</span> <span className="text-muted-foreground">{t("profile.followers")}</span>
               <span className="text-muted-foreground mx-1">·</span>
-              <span className="font-bold text-foreground">{followingCount}</span> <span className="text-muted-foreground">following</span>
+              <span className="font-bold text-foreground">{followingCount}</span> <span className="text-muted-foreground">{t("profile.following_label")}</span>
             </p>
           </div>
         </div>
 
         <div className="border-t border-border" />
 
-        {/* Nav items */}
         <nav className="flex-1 overflow-y-auto py-1 px-2">
           {drawerNavItems.map(({ label, path, icon: Icon }) => {
             const profilePath = path === "/profile" ? `/profile/${profile?.username || ""}` : path;
             return (
-              <NavLink
-                key={label}
-                to={profilePath}
-                onClick={() => onOpenChange(false)}
+              <NavLink key={label} to={profilePath} onClick={() => onOpenChange(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold transition-colors ${
-                    isActive ? "text-foreground bg-accent" : "text-foreground hover:bg-accent"
-                  }`
-                }
-              >
+                  `flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold transition-colors ${isActive ? "text-foreground bg-accent" : "text-foreground hover:bg-accent"}`
+                }>
                 <Icon className="h-5 w-5" strokeWidth={1.75} />
                 {label}
               </NavLink>
             );
           })}
           {isStaff && (
-            <NavLink
-              to="/admin"
-              onClick={() => onOpenChange(false)}
+            <NavLink to="/admin" onClick={() => onOpenChange(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold transition-colors ${
-                  isActive ? "text-primary bg-primary/10" : "text-primary hover:bg-primary/5"
-                }`
-              }
-            >
+                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold transition-colors ${isActive ? "text-primary bg-primary/10" : "text-primary hover:bg-primary/5"}`
+              }>
               <ShieldCheck className="h-5 w-5" strokeWidth={1.75} />
-              {isAdmin ? "Admin Panel" : "Mod Panel"}
+              {isAdmin ? t("drawer.admin_panel") : t("drawer.mod_panel")}
             </NavLink>
           )}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold transition-colors text-destructive hover:bg-destructive/10 w-full"
-          >
+          <button onClick={handleLogout}
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold transition-colors text-destructive hover:bg-destructive/10 w-full">
             <LogOut className="h-5 w-5" strokeWidth={1.75} />
-            Log out
+            {t("drawer.log_out")}
           </button>
         </nav>
 
         <div className="border-t border-border" />
-
-        {/* Dark mode toggle */}
         <div className="flex items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-3">
             {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            <span className="text-sm font-medium">Dark mode</span>
+            <span className="text-sm font-medium">{t("drawer.dark_mode")}</span>
           </div>
-          <Switch
-            checked={isDark}
-            onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-          />
+          <Switch checked={isDark} onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")} />
         </div>
 
         <div className="border-t border-border" />
-
-        {/* Footer - compact */}
         <div className="flex items-center justify-between px-4 py-2.5">
           <div className="flex gap-3 text-xs">
-            <a href="#" className="text-primary hover:underline">Terms</a>
-            <a href="#" className="text-primary hover:underline">Privacy</a>
+            <a href="#" className="text-primary hover:underline">{t("drawer.terms")}</a>
+            <a href="#" className="text-primary hover:underline">{t("drawer.privacy")}</a>
           </div>
           <div className="flex gap-1.5">
             <NavLink to="/support" onClick={() => onOpenChange(false)} className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs text-foreground hover:bg-accent">
-              <MessageCircle className="h-3 w-3" /> Feedback
+              <MessageCircle className="h-3 w-3" /> {t("drawer.feedback")}
             </NavLink>
             <NavLink to="/support" onClick={() => onOpenChange(false)} className="rounded-full border border-border px-2.5 py-1 text-xs text-foreground hover:bg-accent">
-              Help
+              {t("settings.help")}
             </NavLink>
           </div>
         </div>
