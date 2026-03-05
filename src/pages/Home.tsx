@@ -10,10 +10,12 @@ import PostCardSkeleton from "@/components/PostCardSkeleton";
 import Composer from "@/components/Composer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Image as ImageIcon } from "lucide-react";
+import { useTranslation } from "@/i18n/LanguageContext";
 
 type FeedTab = "discover" | "following" | "whats-hot";
 
 export default function Home() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<FeedTab>("discover");
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerAutoImage, setComposerAutoImage] = useState(false);
@@ -35,7 +37,6 @@ export default function Home() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
 
   // Trending topics from actual post content (extract top words)
   const { data: trendingTopics = [] } = useQuery({
@@ -113,7 +114,6 @@ export default function Home() {
       const postIds = filtered.map((p) => p.id);
       if (postIds.length === 0) return [];
       
-      // Collect quote post IDs
       const quotePostIds = filtered.map((p) => (p as any).quote_post_id).filter(Boolean) as string[];
       
       const [likesRes, repostsRes, repliesRes, userLikesRes, userRepostsRes, imagesRes, quotePostsRes, quoteImagesRes] = await Promise.all([
@@ -146,7 +146,6 @@ export default function Home() {
         postImages[img.post_id].push(img.url);
       });
 
-      // Build quote posts map
       const quotePostMap: Record<string, any> = {};
       const quoteImages: Record<string, string[]> = {};
       (quoteImagesRes.data || []).forEach((img: any) => {
@@ -156,12 +155,9 @@ export default function Home() {
       (quotePostsRes.data || []).forEach((qp: any) => {
         const qProfile = qp.profiles as any;
         quotePostMap[qp.id] = {
-          id: qp.id,
-          content: qp.content,
-          authorName: qProfile?.display_name || "",
-          authorHandle: qProfile?.username || "",
-          authorAvatar: qProfile?.avatar_url || "",
-          createdAt: qp.created_at,
+          id: qp.id, content: qp.content,
+          authorName: qProfile?.display_name || "", authorHandle: qProfile?.username || "",
+          authorAvatar: qProfile?.avatar_url || "", createdAt: qp.created_at,
           images: quoteImages[qp.id],
         };
       });
@@ -169,19 +165,13 @@ export default function Home() {
       let result = filtered.map((post) => {
         const p = post.profiles as any;
         return {
-          id: post.id,
-          authorId: post.author_id,
-          authorName: p?.display_name || "Unknown",
-          authorHandle: p?.username || "unknown",
-          authorAvatar: p?.avatar_url || "",
-          content: post.content,
-          createdAt: post.created_at,
+          id: post.id, authorId: post.author_id,
+          authorName: p?.display_name || "Unknown", authorHandle: p?.username || "unknown",
+          authorAvatar: p?.avatar_url || "", content: post.content, createdAt: post.created_at,
           images: postImages[post.id],
-          likeCount: likeCounts[post.id] || 0,
-          replyCount: replyCounts[post.id] || 0,
+          likeCount: likeCounts[post.id] || 0, replyCount: replyCounts[post.id] || 0,
           repostCount: repostCounts[post.id] || 0,
-          isLiked: userLikedSet.has(post.id),
-          isReposted: userRepostedSet.has(post.id),
+          isLiked: userLikedSet.has(post.id), isReposted: userRepostedSet.has(post.id),
           quotePost: (post as any).quote_post_id ? quotePostMap[(post as any).quote_post_id] || null : null,
         };
       });
@@ -196,27 +186,22 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      {/* Sticky: tabs only */}
       <div className="sticky top-[49px] lg:top-0 z-20 bg-background/95 backdrop-blur-sm">
         <div className="flex w-full items-center justify-between border-b border-border px-4">
-          <TabButton label="Discover" active={tab === "discover"} onClick={() => setTab("discover")} />
-          <TabButton label="Following" active={tab === "following"} onClick={() => setTab("following")} />
-          <TabButton label="What's Hot Classic" active={tab === "whats-hot"} onClick={() => setTab("whats-hot")} />
+          <TabButton label={t("home.discover")} active={tab === "discover"} onClick={() => setTab("discover")} />
+          <TabButton label={t("home.following")} active={tab === "following"} onClick={() => setTab("following")} />
+          <TabButton label={t("home.whats_hot")} active={tab === "whats-hot"} onClick={() => setTab("whats-hot")} />
         </div>
       </div>
 
-      {/* Trending topics row - scrolls with content, NOT sticky */}
       {tab === "discover" && showTopics && trendingTopics.length > 0 && (
         <div className="flex items-center border-b border-border">
           <ScrollArea className="flex-1">
             <div className="flex items-center gap-0.5 px-2 py-2">
               <TrendingUp className="h-4 w-4 text-primary flex-shrink-0 mx-1" />
               {trendingTopics.map((topic) => (
-                <button
-                  key={topic}
-                  onClick={() => navigate(`/search?q=${encodeURIComponent(topic)}`)}
-                  className="whitespace-nowrap rounded-full px-3 py-1 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
-                >
+                <button key={topic} onClick={() => navigate(`/search?q=${encodeURIComponent(topic)}`)}
+                  className="whitespace-nowrap rounded-full px-3 py-1 text-sm font-semibold text-foreground hover:bg-accent transition-colors">
                   {topic}
                 </button>
               ))}
@@ -229,7 +214,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Composer prompt */}
       <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border">
         <Avatar className="h-10 w-10 flex-shrink-0">
           <AvatarImage src={profile?.avatar_url || ""} />
@@ -237,28 +221,20 @@ export default function Home() {
             {profile?.display_name?.[0]?.toUpperCase() || "?"}
           </AvatarFallback>
         </Avatar>
-        <button
-          onClick={() => setComposerOpen(true)}
-          className="flex-1 text-left text-muted-foreground text-[15px]"
-        >
-          What's up?
+        <button onClick={() => setComposerOpen(true)} className="flex-1 text-left text-muted-foreground text-[15px]">
+          {t("home.whats_up")}
         </button>
         <button onClick={() => { setComposerAutoImage(true); setComposerOpen(true); }}>
           <ImageIcon className="h-5 w-5 text-muted-foreground" strokeWidth={1.75} />
         </button>
       </div>
 
-      {/* Feed */}
       {isLoading ? (
-        <div>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <PostCardSkeleton key={i} />
-          ))}
-        </div>
+        <div>{Array.from({ length: 6 }).map((_, i) => <PostCardSkeleton key={i} />)}</div>
       ) : posts.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">
-          <p className="text-lg font-medium">No posts yet</p>
-          <p className="mt-1 text-sm">Be the first to post something!</p>
+          <p className="text-lg font-medium">{t("home.no_posts")}</p>
+          <p className="mt-1 text-sm">{t("home.be_first")}</p>
         </div>
       ) : (
         posts.map((post) => <PostCard key={post.id} {...post} />)
@@ -266,13 +242,10 @@ export default function Home() {
 
       <Composer open={composerOpen} onOpenChange={(v) => { setComposerOpen(v); if (!v) setComposerAutoImage(false); }} autoOpenImagePicker={composerAutoImage} />
 
-      {/* Back to top button - left side */}
       {showBackToTop && (
-        <button
-          onClick={scrollToTop}
+        <button onClick={scrollToTop}
           className="fixed bottom-20 left-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 active:scale-95 lg:bottom-6 lg:left-[calc(50%-340px)]"
-          aria-label="Back to top"
-        >
+          aria-label="Back to top">
           <ArrowUp className="h-5 w-5" />
         </button>
       )}
@@ -282,16 +255,10 @@ export default function Home() {
 
 function TabButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      className={`relative py-3 whitespace-nowrap text-sm font-semibold transition-colors ${
-        active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
+    <button onClick={onClick}
+      className={`relative py-3 whitespace-nowrap text-sm font-semibold transition-colors ${active ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
       {label}
-      {active && (
-        <div className="absolute bottom-0 left-1/2 h-[3px] w-12 -translate-x-1/2 rounded-full bg-primary" />
-      )}
+      {active && <div className="absolute bottom-0 left-1/2 h-[3px] w-12 -translate-x-1/2 rounded-full bg-primary" />}
     </button>
   );
 }
