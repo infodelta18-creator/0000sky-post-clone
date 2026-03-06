@@ -31,5 +31,9 @@ const hi: Record<string, string> = {
   "drawer.admin_panel": "एडमिन पैनल", "drawer.mod_panel": "मॉड पैनल", "drawer.log_out": "लॉग आउट", "drawer.dark_mode": "डार्क मोड", "drawer.terms": "शर्तें", "drawer.privacy": "गोपनीयता", "drawer.feedback": "प्रतिक्रिया",
   "sidebar.search": "खोजें", "sidebar.whats_hot": "क्या हॉट है", "sidebar.no_trending": "अभी कोई ट्रेंडिंग पोस्ट नहीं", "sidebar.suggested": "आपके लिए सुझाव", "sidebar.no_suggestions": "कोई सुझाव उपलब्ध नहीं", "sidebar.followed": "फ़ॉलो किया!", "sidebar.already_following": "पहले से फ़ॉलो कर रहे हैं",
   "common.save": "सहेजें", "common.cancel": "रद्द", "common.delete": "हटाएं", "common.loading": "लोड हो रहा है...", "common.ago": "पहले", "common.likes": "पसंद", "common.follow": "फ़ॉलो", "common.english": "अंग्रेज़ी",
+  "conv.e2e": "संदेश एंड-टू-एंड एन्क्रिप्टेड हैं", "conv.beginning": "यह आपकी बातचीत की शुरुआत है",
+  "reset.title": "नया पासवर्ड सेट करें", "reset.desc": "नीचे अपना नया पासवर्ड दर्ज करें", "reset.new_password": "नया पासवर्ड", "reset.confirm": "नया पासवर्ड पुष्टि करें", "reset.no_match": "पासवर्ड मेल नहीं खाते", "reset.updated": "पासवर्ड अपडेट हो गया!", "reset.updated_desc": "आपका पासवर्ड सफलतापूर्वक रीसेट हो गया।", "reset.continue": "Awaj पर जारी रखें", "reset.update_btn": "पासवर्ड अपडेट करें", "reset.updating": "अपडेट हो रहा है...", "reset.invalid_link": "अमान्य या समाप्त रीसेट लिंक",
+  "notfound.title": "404", "notfound.message": "ओह! पेज नहीं मिला", "notfound.go_home": "होम पर वापस",
+  "follow.no_followers": "अभी कोई फ़ॉलोअर नहीं", "follow.no_following": "अभी किसी को फ़ॉलो नहीं किया",
 };
 export default hi;

@@ -123,7 +123,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
 
   const handleClose = () => {
     images.forEach((img) => URL.revokeObjectURL(img.preview));
-    setContent(""); setImages(["); onOpenChange(false);
+    setContent(""); setImages([]); onOpenChange(false);
   };
 
   const ringRadius = 10;

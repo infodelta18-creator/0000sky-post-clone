@@ -8,6 +8,7 @@ import { ArrowLeft, MoreHorizontal, Lock, X } from "lucide-react";
 import MessageBubble from "@/components/chat/MessageBubble";
 import ChatInput from "@/components/chat/ChatInput";
 import ConversationOptions from "@/components/chat/ConversationOptions";
+import { useTranslation } from "@/i18n/LanguageContext";
 
 export default function Conversation() {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -17,6 +18,7 @@ export default function Conversation() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [replyTo, setReplyTo] = useState<{ id: string; content: string; senderName: string } | null>(null);
+  const { t } = useTranslation();
 
   // Get conversation details
   const { data: conversation } = useQuery({
@@ -167,7 +169,7 @@ export default function Conversation() {
   const handleReply = (messageId: string) => {
     const msg = messages.find((m: any) => m.id === messageId);
     if (!msg) return;
-    const senderName = (msg as any).sender_id === user?.id ? "You" : (conversation?.otherUser?.display_name || "User");
+    const senderName = (msg as any).sender_id === user?.id ? t("msg.you").replace(":", "") : (conversation?.otherUser?.display_name || "User");
     setReplyTo({ id: messageId, content: (msg as any).content, senderName });
   };
 
@@ -183,7 +185,7 @@ export default function Conversation() {
   };
 
   if (!conversation) {
-    return <div className="flex items-center justify-center py-20 text-muted-foreground">Loading...</div>;
+    return <div className="flex items-center justify-center py-20 text-muted-foreground">{t("common.loading")}</div>;
   }
 
   const otherUser = conversation.otherUser;
@@ -229,7 +231,7 @@ export default function Conversation() {
       {isEncrypted && (
         <div className="flex items-center justify-center gap-1.5 py-1.5 bg-primary/5 border-b border-border text-xs text-primary flex-shrink-0">
           <Lock className="h-3 w-3" />
-          <span>Messages are end-to-end encrypted</span>
+          <span>{t("conv.e2e")}</span>
         </div>
       )}
 
@@ -245,7 +247,7 @@ export default function Conversation() {
             </Avatar>
             <p className="font-bold text-lg">{otherUser?.display_name}</p>
             <p className="text-sm text-muted-foreground">@{otherUser?.username}</p>
-            <p className="mt-2 text-sm text-muted-foreground">This is the beginning of your conversation</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("conv.beginning")}</p>
           </div>
         )}
 
@@ -258,7 +260,7 @@ export default function Conversation() {
               const isMine = msg.sender_id === user?.id;
               const replyMsg = msg.reply_to_id ? messages.find((m: any) => m.id === msg.reply_to_id) : null;
               const replySender = replyMsg
-                ? ((replyMsg as any).sender_id === user?.id ? "You" : otherUser?.display_name || "User")
+                ? ((replyMsg as any).sender_id === user?.id ? t("msg.you").replace(":", "") : otherUser?.display_name || "User")
                 : null;
 
               return (
