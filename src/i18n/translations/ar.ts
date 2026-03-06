@@ -31,5 +31,9 @@ const ar: Record<string, string> = {
   "drawer.admin_panel": "لوحة المشرف", "drawer.mod_panel": "لوحة المراقب", "drawer.log_out": "تسجيل الخروج", "drawer.dark_mode": "الوضع الداكن", "drawer.terms": "الشروط", "drawer.privacy": "الخصوصية", "drawer.feedback": "ملاحظات",
   "sidebar.search": "بحث", "sidebar.whats_hot": "الأكثر رواجاً", "sidebar.no_trending": "لا توجد منشورات رائجة بعد", "sidebar.suggested": "مقترح لك", "sidebar.no_suggestions": "لا توجد اقتراحات", "sidebar.followed": "تمت المتابعة!", "sidebar.already_following": "متابَع بالفعل",
   "common.save": "حفظ", "common.cancel": "إلغاء", "common.delete": "حذف", "common.loading": "جاري التحميل...", "common.ago": "منذ", "common.likes": "إعجابات", "common.follow": "متابعة", "common.english": "الإنجليزية",
+  "conv.e2e": "الرسائل مشفرة من طرف إلى طرف", "conv.beginning": "هذه بداية محادثتك",
+  "reset.title": "تعيين كلمة مرور جديدة", "reset.desc": "أدخل كلمة المرور الجديدة أدناه", "reset.new_password": "كلمة مرور جديدة", "reset.confirm": "تأكيد كلمة المرور الجديدة", "reset.no_match": "كلمات المرور غير متطابقة", "reset.updated": "تم تحديث كلمة المرور!", "reset.updated_desc": "تمت إعادة تعيين كلمة المرور بنجاح.", "reset.continue": "المتابعة إلى Awaj", "reset.update_btn": "تحديث كلمة المرور", "reset.updating": "جاري التحديث...", "reset.invalid_link": "رابط إعادة التعيين غير صالح أو منتهي",
+  "notfound.title": "404", "notfound.message": "عذراً! الصفحة غير موجودة", "notfound.go_home": "العودة للرئيسية",
+  "follow.no_followers": "لا يوجد متابعون بعد", "follow.no_following": "لا تتابع أحداً بعد",
 };
 export default ar;

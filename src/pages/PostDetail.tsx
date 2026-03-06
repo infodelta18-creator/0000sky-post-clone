@@ -12,12 +12,14 @@ import { useState } from "react";
 import Composer from "@/components/Composer";
 import ImageGrid from "@/components/ImageGrid";
 import RichContent from "@/components/RichContent";
+import { useTranslation } from "@/i18n/LanguageContext";
 
 export default function PostDetail() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [replyOpen, setReplyOpen] = useState(false);
+  const { t } = useTranslation();
 
   const { data: post } = useQuery({
     queryKey: ["post", postId],
@@ -130,7 +132,7 @@ export default function PostDetail() {
   });
 
   if (!post) {
-    return <div className="flex items-center justify-center py-20 text-muted-foreground">Loading...</div>;
+    return <div className="flex items-center justify-center py-20 text-muted-foreground">{t("common.loading")}</div>;
   }
 
   const profile = post.profiles as any;
@@ -142,7 +144,7 @@ export default function PostDetail() {
         <button onClick={() => navigate(-1)} className="rounded-full p-1.5 transition-colors bsky-hover">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h2 className="text-lg font-bold">Post</h2>
+        <h2 className="text-lg font-bold">{t("detail.post")}</h2>
       </div>
 
       {/* Main Post */}
@@ -209,9 +211,9 @@ export default function PostDetail() {
         {/* Stats */}
         {(stats?.reposts || stats?.likes || stats?.replies) ? (
           <div className="mt-3 flex gap-4 border-t border-border pt-3 text-sm">
-            {stats.replies > 0 && <span><strong>{stats.replies}</strong> <span className="text-muted-foreground">Replies</span></span>}
-            {stats.reposts > 0 && <span><strong>{stats.reposts}</strong> <span className="text-muted-foreground">Reposts</span></span>}
-            {stats.likes > 0 && <span><strong>{stats.likes}</strong> <span className="text-muted-foreground">Likes</span></span>}
+            {stats.replies > 0 && <span><strong>{stats.replies}</strong> <span className="text-muted-foreground">{t("detail.replies")}</span></span>}
+            {stats.reposts > 0 && <span><strong>{stats.reposts}</strong> <span className="text-muted-foreground">{t("detail.reposts")}</span></span>}
+            {stats.likes > 0 && <span><strong>{stats.likes}</strong> <span className="text-muted-foreground">{t("detail.likes")}</span></span>}
           </div>
         ) : null}
 
@@ -221,7 +223,7 @@ export default function PostDetail() {
             onClick={() => setReplyOpen(true)}
             className="mt-3 w-full border-t border-border pt-3 text-left text-sm text-muted-foreground transition-colors bsky-hover"
           >
-            Write your reply...
+            {t("detail.write_reply")}
           </button>
         )}
       </div>

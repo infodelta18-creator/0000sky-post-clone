@@ -31,5 +31,9 @@ const ja: Record<string, string> = {
   "drawer.admin_panel": "管理パネル", "drawer.mod_panel": "モデレーターパネル", "drawer.log_out": "ログアウト", "drawer.dark_mode": "ダークモード", "drawer.terms": "利用規約", "drawer.privacy": "プライバシー", "drawer.feedback": "フィードバック",
   "sidebar.search": "検索", "sidebar.whats_hot": "ホット", "sidebar.no_trending": "トレンドの投稿はまだありません", "sidebar.suggested": "おすすめ", "sidebar.no_suggestions": "おすすめはありません", "sidebar.followed": "フォローしました！", "sidebar.already_following": "すでにフォロー中",
   "common.save": "保存", "common.cancel": "キャンセル", "common.delete": "削除", "common.loading": "読み込み中...", "common.ago": "前", "common.likes": "いいね", "common.follow": "フォロー", "common.english": "英語",
+  "conv.e2e": "メッセージはエンドツーエンドで暗号化されています", "conv.beginning": "会話の始まりです",
+  "reset.title": "新しいパスワードを設定", "reset.desc": "下に新しいパスワードを入力してください", "reset.new_password": "新しいパスワード", "reset.confirm": "新しいパスワードを確認", "reset.no_match": "パスワードが一致しません", "reset.updated": "パスワードが更新されました！", "reset.updated_desc": "パスワードが正常にリセットされました。", "reset.continue": "Awajに進む", "reset.update_btn": "パスワードを更新", "reset.updating": "更新中...", "reset.invalid_link": "無効または期限切れのリセットリンク",
+  "notfound.title": "404", "notfound.message": "おっと！ページが見つかりません", "notfound.go_home": "ホームに戻る",
+  "follow.no_followers": "まだフォロワーがいません", "follow.no_following": "まだ誰もフォローしていません",
 };
 export default ja;

@@ -31,5 +31,9 @@ const fr: Record<string, string> = {
   "drawer.admin_panel": "Panneau admin", "drawer.mod_panel": "Panneau mod", "drawer.log_out": "Se déconnecter", "drawer.dark_mode": "Mode sombre", "drawer.terms": "Conditions", "drawer.privacy": "Confidentialité", "drawer.feedback": "Retours",
   "sidebar.search": "Rechercher", "sidebar.whats_hot": "Tendances", "sidebar.no_trending": "Pas encore de tendances", "sidebar.suggested": "Suggestions pour vous", "sidebar.no_suggestions": "Aucune suggestion disponible", "sidebar.followed": "Suivi !", "sidebar.already_following": "Déjà abonné",
   "common.save": "Enregistrer", "common.cancel": "Annuler", "common.delete": "Supprimer", "common.loading": "Chargement...", "common.ago": "il y a", "common.likes": "j'aime", "common.follow": "Suivre", "common.english": "Anglais",
+  "conv.e2e": "Les messages sont chiffrés de bout en bout", "conv.beginning": "C'est le début de votre conversation",
+  "reset.title": "Définir un nouveau mot de passe", "reset.desc": "Entrez votre nouveau mot de passe ci-dessous", "reset.new_password": "Nouveau mot de passe", "reset.confirm": "Confirmer le nouveau mot de passe", "reset.no_match": "Les mots de passe ne correspondent pas", "reset.updated": "Mot de passe mis à jour !", "reset.updated_desc": "Votre mot de passe a été réinitialisé avec succès.", "reset.continue": "Continuer vers Awaj", "reset.update_btn": "Mettre à jour le mot de passe", "reset.updating": "Mise à jour...", "reset.invalid_link": "Lien de réinitialisation invalide ou expiré",
+  "notfound.title": "404", "notfound.message": "Oups ! Page non trouvée", "notfound.go_home": "Retour à l'accueil",
+  "follow.no_followers": "Pas encore d'abonnés", "follow.no_following": "Ne suit personne encore",
 };
 export default fr;

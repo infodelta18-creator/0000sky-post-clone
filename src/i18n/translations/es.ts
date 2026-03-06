@@ -31,5 +31,9 @@ const es: Record<string, string> = {
   "drawer.admin_panel": "Panel de admin", "drawer.mod_panel": "Panel de mod", "drawer.log_out": "Cerrar sesión", "drawer.dark_mode": "Modo oscuro", "drawer.terms": "Términos", "drawer.privacy": "Privacidad", "drawer.feedback": "Comentarios",
   "sidebar.search": "Buscar", "sidebar.whats_hot": "Lo más caliente", "sidebar.no_trending": "Aún no hay tendencias", "sidebar.suggested": "Sugeridos para ti", "sidebar.no_suggestions": "Sin sugerencias disponibles", "sidebar.followed": "¡Seguido!", "sidebar.already_following": "Ya sigues",
   "common.save": "Guardar", "common.cancel": "Cancelar", "common.delete": "Eliminar", "common.loading": "Cargando...", "common.ago": "hace", "common.likes": "me gusta", "common.follow": "Seguir", "common.english": "Inglés",
+  "conv.e2e": "Los mensajes están cifrados de extremo a extremo", "conv.beginning": "Este es el inicio de tu conversación",
+  "reset.title": "Establecer nueva contraseña", "reset.desc": "Ingresa tu nueva contraseña abajo", "reset.new_password": "Nueva contraseña", "reset.confirm": "Confirmar nueva contraseña", "reset.no_match": "Las contraseñas no coinciden", "reset.updated": "¡Contraseña actualizada!", "reset.updated_desc": "Tu contraseña se ha restablecido exitosamente.", "reset.continue": "Continuar a Awaj", "reset.update_btn": "Actualizar contraseña", "reset.updating": "Actualizando...", "reset.invalid_link": "Enlace de restablecimiento inválido o expirado",
+  "notfound.title": "404", "notfound.message": "¡Ups! Página no encontrada", "notfound.go_home": "Volver al inicio",
+  "follow.no_followers": "Aún no hay seguidores", "follow.no_following": "Aún no sigues a nadie",
 };
 export default es;

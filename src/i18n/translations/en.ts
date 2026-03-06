@@ -431,6 +431,32 @@ const en = {
   "common.likes": "likes",
   "common.follow": "Follow",
   "common.english": "English",
+
+  // Conversation
+  "conv.e2e": "Messages are end-to-end encrypted",
+  "conv.beginning": "This is the beginning of your conversation",
+
+  // Reset Password
+  "reset.title": "Set new password",
+  "reset.desc": "Enter your new password below",
+  "reset.new_password": "New password",
+  "reset.confirm": "Confirm new password",
+  "reset.no_match": "Passwords do not match",
+  "reset.updated": "Password updated!",
+  "reset.updated_desc": "Your password has been successfully reset.",
+  "reset.continue": "Continue to Awaj",
+  "reset.update_btn": "Update Password",
+  "reset.updating": "Updating...",
+  "reset.invalid_link": "Invalid or expired reset link",
+
+  // 404
+  "notfound.title": "404",
+  "notfound.message": "Oops! Page not found",
+  "notfound.go_home": "Return to Home",
+
+  // Follow list
+  "follow.no_followers": "No followers yet",
+  "follow.no_following": "No following yet",
 };
 
 export default en;

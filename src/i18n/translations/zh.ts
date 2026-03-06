@@ -31,5 +31,9 @@ const zh: Record<string, string> = {
   "drawer.admin_panel": "管理面板", "drawer.mod_panel": "审核面板", "drawer.log_out": "退出", "drawer.dark_mode": "深色模式", "drawer.terms": "条款", "drawer.privacy": "隐私", "drawer.feedback": "反馈",
   "sidebar.search": "搜索", "sidebar.whats_hot": "热门", "sidebar.no_trending": "暂无热门帖子", "sidebar.suggested": "为你推荐", "sidebar.no_suggestions": "暂无推荐", "sidebar.followed": "已关注！", "sidebar.already_following": "已经关注",
   "common.save": "保存", "common.cancel": "取消", "common.delete": "删除", "common.loading": "加载中...", "common.ago": "前", "common.likes": "喜欢", "common.follow": "关注", "common.english": "英语",
+  "conv.e2e": "消息已端到端加密", "conv.beginning": "这是你对话的开始",
+  "reset.title": "设置新密码", "reset.desc": "在下方输入新密码", "reset.new_password": "新密码", "reset.confirm": "确认新密码", "reset.no_match": "密码不匹配", "reset.updated": "密码已更新！", "reset.updated_desc": "你的密码已成功重置。", "reset.continue": "继续使用 Awaj", "reset.update_btn": "更新密码", "reset.updating": "更新中...", "reset.invalid_link": "无效或过期的重置链接",
+  "notfound.title": "404", "notfound.message": "哎呀！页面未找到", "notfound.go_home": "返回首页",
+  "follow.no_followers": "暂无粉丝", "follow.no_following": "暂未关注任何人",
 };
 export default zh;
