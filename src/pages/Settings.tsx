@@ -142,10 +142,30 @@ function AccountSection({ renderBack, setSection }: { renderBack: (t: string, on
     if (!handle || handle.length < 3) { toast.error(t("account.handle_rules")); return; }
     if (!/^[a-z0-9_]+$/.test(handle)) { toast.error(t("account.handle_rules")); return; }
     if (handle === profile?.username) { setSubSection(null); return; }
+
+    // Check 6-month cooldown
     setSaving(true);
+    const { data: currentProfile } = await supabase
+      .from("profiles")
+      .select("username_changed_at")
+      .eq("id", user!.id)
+      .single();
+
+    if (currentProfile?.username_changed_at) {
+      const lastChanged = new Date(currentProfile.username_changed_at);
+      const sixMonthsLater = new Date(lastChanged);
+      sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+      if (new Date() < sixMonthsLater) {
+        setSaving(false);
+        const nextDate = sixMonthsLater.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        toast.error(t("account.handle_cooldown").replace("{date}", nextDate));
+        return;
+      }
+    }
+
     const { data: existing } = await supabase.from("profiles").select("id").eq("username", handle).neq("id", user!.id).maybeSingle();
     if (existing) { setSaving(false); toast.error(t("account.username_taken")); return; }
-    const { error } = await supabase.from("profiles").update({ username: handle }).eq("id", user!.id);
+    const { error } = await supabase.from("profiles").update({ username: handle, username_changed_at: new Date().toISOString() } as any).eq("id", user!.id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(t("account.handle_updated"));
@@ -191,7 +211,8 @@ function AccountSection({ renderBack, setSection }: { renderBack: (t: string, on
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
               <Input className="pl-8" value={newHandle} onChange={(e) => setNewHandle(e.target.value.toLowerCase())} placeholder="username" />
             </div>
-            <p className="text-xs text-muted-foreground">{t("account.handle_rules")}</p>
+           <p className="text-xs text-muted-foreground">{t("account.handle_rules")}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">{t("account.handle_cooldown_info")}</p>
           </div>
           <Button className="w-full rounded-full" disabled={saving || !newHandle.trim()} onClick={handleUpdateHandle}>
             {saving ? t("account.saving") : t("account.save_handle")}
