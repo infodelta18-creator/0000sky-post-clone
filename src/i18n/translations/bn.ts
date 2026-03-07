@@ -140,6 +140,8 @@ const bn: Record<string, string> = {
   "account.save_handle": "হ্যান্ডেল সংরক্ষণ",
   "account.saving": "সংরক্ষণ হচ্ছে...",
   "account.handle_updated": "হ্যান্ডেল আপডেট হয়েছে",
+  "account.handle_cooldown": "আপনি প্রতি ৬ মাসে একবার ব্যবহারকারী নাম পরিবর্তন করতে পারবেন। {date} এর পরে আবার চেষ্টা করুন।",
+  "account.handle_cooldown_info": "আপনি প্রতি ৬ মাসে একবার ব্যবহারকারী নাম পরিবর্তন করতে পারবেন।",
   "account.username_taken": "ব্যবহারকারী নাম ইতিমধ্যে নেওয়া হয়েছে",
   "account.birthday_updated": "জন্মদিন আপডেট হয়েছে",
   "account.export_data": "আমার ডেটা রপ্তানি",
