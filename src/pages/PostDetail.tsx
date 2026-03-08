@@ -28,7 +28,7 @@ export default function PostDetail() {
     queryFn: async () => {
       const { data } = await supabase
         .from("posts")
-        .select(`id, content, created_at, parent_id, author_id, quote_post_id, video_url, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
+        .select(`id, content, created_at, parent_id, author_id, quote_post_id, video_url, embed_url, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
         .eq("id", postId!)
         .single();
       if (!data) return null;
