@@ -21,7 +21,7 @@ export default function AppLayout() {
       <DesktopSidebar />
 
       <div className="flex w-full max-w-feed flex-col border-x border-border min-h-screen">
-        {pathname === "/" && <MobileTopBar />}
+        {pathname === "/home" && <MobileTopBar />}
         <Outlet />
         {/* Mobile bottom padding - not on conversation pages */}
         {!isConversation && <div className="h-16 lg:hidden" />}
