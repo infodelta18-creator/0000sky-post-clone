@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import PostCard from "@/components/PostCard";
 import { ArrowLeft, MoreHorizontal, Camera, Link2, Search, ListFilter, Radio, BellPlus, BellOff, Flag, VolumeX, Ban, X, Globe, Info, ExternalLink, Tv, Headphones, Mic } from "lucide-react";
+import ImageCropDialog from "@/components/ImageCropDialog";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
@@ -1176,18 +1177,39 @@ function EditProfileDialog({ open, onOpenChange, profile, onSaved }: any) {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
+  // Crop dialog state
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState("");
+  const [cropShape, setCropShape] = useState<"avatar" | "banner">("avatar");
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
+    setCropSrc(URL.createObjectURL(file));
+    setCropShape("avatar");
+    setCropOpen(true);
+    // Reset input so same file can be re-selected
+    e.target.value = "";
   };
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setBannerFile(file);
-    setBannerPreview(URL.createObjectURL(file));
+    setCropSrc(URL.createObjectURL(file));
+    setCropShape("banner");
+    setCropOpen(true);
+    e.target.value = "";
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    const previewUrl = URL.createObjectURL(croppedFile);
+    if (cropShape === "avatar") {
+      setAvatarFile(croppedFile);
+      setAvatarPreview(previewUrl);
+    } else {
+      setBannerFile(croppedFile);
+      setBannerPreview(previewUrl);
+    }
   };
 
   const uploadImage = async (file: File) => {
@@ -1277,6 +1299,15 @@ function EditProfileDialog({ open, onOpenChange, profile, onSaved }: any) {
               className="mt-1 bg-secondary/50 border-0 rounded-lg resize-none" />
           </div>
         </div>
+
+        {/* Image Crop Dialog */}
+        <ImageCropDialog
+          open={cropOpen}
+          onOpenChange={setCropOpen}
+          imageSrc={cropSrc}
+          cropShape={cropShape}
+          onCropComplete={handleCropComplete}
+        />
       </DialogContent>
     </Dialog>
   );
