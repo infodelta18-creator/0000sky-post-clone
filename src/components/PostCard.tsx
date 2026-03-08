@@ -16,6 +16,7 @@ import EmbedPlayer from "@/components/EmbedPlayer";
 import LiveAvatar from "@/components/LiveAvatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Composer from "@/components/Composer";
+import SharePostDialog from "@/components/SharePostDialog";
 
 interface PostCardProps {
   id: string;
@@ -57,6 +58,7 @@ export default function PostCard({
   const [hidden, setHidden] = useState(false);
   const [quoteComposerOpen, setQuoteComposerOpen] = useState(false);
   const [replyComposerOpen, setReplyComposerOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -142,7 +144,7 @@ export default function PostCard({
 
   const handleSendDM = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/messages?share=${id}`);
+    setShareDialogOpen(true);
   };
 
   if (hidden) return null;
@@ -300,6 +302,13 @@ export default function PostCard({
         open={quoteComposerOpen}
         onOpenChange={setQuoteComposerOpen}
         quotePost={{ id, content, authorName, authorHandle, authorAvatar, createdAt, images }}
+      />
+
+      {/* Share via DM dialog */}
+      <SharePostDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        postId={id}
       />
     </>
   );
