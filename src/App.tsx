@@ -54,19 +54,19 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/** Root route: authenticated → Home feed, unauthenticated → Landing page */
+/** Root route: authenticated → Home feed in AppLayout, unauthenticated → Landing page */
 function RootRoute() {
   const { user, loading } = useAuth();
   if (loading) return <div className="flex min-h-screen items-center justify-center"><div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>;
-  if (user) return <Navigate to="/home" replace />;
-  return <LandingPage />;
+  if (!user) return <LandingPage />;
+  return <AppLayout homeOverride={<Home />} />;
 }
 
-/** Explore route: authenticated → redirect to home, unauthenticated → public feed */
+/** Explore route: authenticated → redirect to /, unauthenticated → public feed */
 function ExploreRoute() {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (user) return <Navigate to="/home" replace />;
+  if (user) return <Navigate to="/" replace />;
   return <PublicFeed />;
 }
 
@@ -85,7 +85,6 @@ const App = () => (
               <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-                <Route path="/home" element={<Home />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/feeds" element={<Feeds />} />
                 <Route path="/feeds/settings" element={<FeedSettings />} />

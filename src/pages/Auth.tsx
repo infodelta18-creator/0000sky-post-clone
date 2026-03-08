@@ -32,7 +32,7 @@ export default function Auth() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault(); setError(""); setLoading(true);
-    try { await signIn(email, password); navigate("/home"); }
+    try { await signIn(email, password); navigate("/"); }
     catch (err: any) { setError(err.message || "Invalid email or password"); }
     finally { setLoading(false); }
   };
