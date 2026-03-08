@@ -66,7 +66,7 @@ export default function PostDetail() {
     queryFn: async () => {
       const { data } = await supabase
         .from("posts")
-        .select(`id, content, created_at, parent_id, author_id, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
+        .select(`id, content, created_at, parent_id, author_id, video_url, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
         .eq("parent_id", postId!)
         .order("created_at", { ascending: true });
       if (!data || data.length === 0) return [];
@@ -108,6 +108,7 @@ export default function PostDetail() {
           content: r.content,
           createdAt: r.created_at,
           images: postImages[r.id],
+          videoUrl: (r as any).video_url || null,
           likeCount: likeCounts[r.id] || 0,
           replyCount: replyCounts[r.id] || 0,
           repostCount: repostCounts[r.id] || 0,
