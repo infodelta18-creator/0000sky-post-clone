@@ -544,17 +544,52 @@ function PrivacySection({ renderBack, setSection }: { renderBack: (t: string, on
 // ===========================
 function ModerationSection({ renderBack, setSection }: { renderBack: (t: string, onBack?: () => void) => React.ReactNode; setSection: (s: string | null) => void }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { t } = useTranslation();
 
-  const [adultContent, setAdultContent] = useState(() => localStorage.getItem("awaj-adult-content") === "true");
-  const [adultFilter, setAdultFilter] = useState(() => localStorage.getItem("awaj-adult-filter") || "hide");
-  const [suggestiveFilter, setSuggestiveFilter] = useState(() => localStorage.getItem("awaj-suggestive-filter") || "warn");
-  const [graphicFilter, setGraphicFilter] = useState(() => localStorage.getItem("awaj-graphic-filter") || "warn");
-  const [nudityFilter, setNudityFilter] = useState(() => localStorage.getItem("awaj-nudity-filter") || "hide");
+  const [loaded, setLoaded] = useState(false);
+  const [adultContent, setAdultContent] = useState(false);
+  const [adultFilter, setAdultFilter] = useState("hide");
+  const [suggestiveFilter, setSuggestiveFilter] = useState("warn");
+  const [graphicFilter, setGraphicFilter] = useState("warn");
+  const [nudityFilter, setNudityFilter] = useState("hide");
 
-  const saveFilter = (key: string, value: string, setter: (v: string) => void) => {
+  // Load from DB
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("moderation_settings").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (data) {
+        const d = data as any;
+        setAdultContent(d.adult_content_enabled);
+        setAdultFilter(d.adult_filter);
+        setSuggestiveFilter(d.suggestive_filter);
+        setGraphicFilter(d.graphic_filter);
+        setNudityFilter(d.nudity_filter);
+        // Sync to localStorage for use elsewhere
+        localStorage.setItem("awaj-adult-content", String(d.adult_content_enabled));
+        localStorage.setItem("awaj-adult-filter", d.adult_filter);
+        localStorage.setItem("awaj-suggestive-filter", d.suggestive_filter);
+        localStorage.setItem("awaj-graphic-filter", d.graphic_filter);
+        localStorage.setItem("awaj-nudity-filter", d.nudity_filter);
+      }
+      setLoaded(true);
+    });
+  }, [user]);
+
+  const persistSettings = async (updates: Record<string, any>) => {
+    if (!user) return;
+    const { data: existing } = await supabase.from("moderation_settings").select("id").eq("user_id", user.id).maybeSingle();
+    if (existing) {
+      await supabase.from("moderation_settings").update({ ...updates, updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
+    } else {
+      await supabase.from("moderation_settings").insert({ user_id: user.id, ...updates } as any);
+    }
+  };
+
+  const saveFilter = (key: string, dbField: string, value: string, setter: (v: string) => void) => {
     setter(value);
     localStorage.setItem(key, value);
+    persistSettings({ [dbField]: value });
   };
 
   return (
@@ -565,7 +600,6 @@ function ModerationSection({ renderBack, setSection }: { renderBack: (t: string,
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{t("mod.tools")}</h3>
         </div>
         <div className="border-y border-border bg-muted/30">
-          <SettingsRow icon={Filter} label={t("mod.interaction")} onClick={() => toast.info(t("mod.interaction_note"))} />
           <SettingsRow icon={VolumeX} label={t("mod.muted")} onClick={() => setSection("muted")} />
           <SettingsRow icon={UserX} label={t("mod.blocked")} onClick={() => setSection("blocked")} />
           <SettingsRow icon={BadgeCheck} label={t("mod.verification")} onClick={() => navigate("/verification/apply")} />
@@ -579,13 +613,17 @@ function ModerationSection({ renderBack, setSection }: { renderBack: (t: string,
             <span className="text-[15px] font-medium text-foreground">{t("mod.enable_adult")}</span>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">{adultContent ? t("privacy.enabled") : t("privacy.disabled")}</span>
-              <Switch checked={adultContent} onCheckedChange={(v) => { setAdultContent(v); localStorage.setItem("awaj-adult-content", String(v)); }} />
+              <Switch disabled={!loaded} checked={adultContent} onCheckedChange={(v) => {
+                setAdultContent(v);
+                localStorage.setItem("awaj-adult-content", String(v));
+                persistSettings({ adult_content_enabled: v });
+              }} />
             </div>
           </div>
-          <ContentFilterRow label={t("mod.adult_content")} description={t("mod.adult_desc")} value={adultFilter} onChange={(v) => saveFilter("awaj-adult-filter", v, setAdultFilter)} />
-          <ContentFilterRow label={t("mod.suggestive")} description={t("mod.suggestive_desc")} value={suggestiveFilter} onChange={(v) => saveFilter("awaj-suggestive-filter", v, setSuggestiveFilter)} />
-          <ContentFilterRow label={t("mod.graphic")} description={t("mod.graphic_desc")} value={graphicFilter} onChange={(v) => saveFilter("awaj-graphic-filter", v, setGraphicFilter)} />
-          <ContentFilterRow label={t("mod.nudity")} description={t("mod.nudity_desc")} value={nudityFilter} onChange={(v) => saveFilter("awaj-nudity-filter", v, setNudityFilter)} />
+          <ContentFilterRow label={t("mod.adult_content")} description={t("mod.adult_desc")} value={adultFilter} onChange={(v) => saveFilter("awaj-adult-filter", "adult_filter", v, setAdultFilter)} />
+          <ContentFilterRow label={t("mod.suggestive")} description={t("mod.suggestive_desc")} value={suggestiveFilter} onChange={(v) => saveFilter("awaj-suggestive-filter", "suggestive_filter", v, setSuggestiveFilter)} />
+          <ContentFilterRow label={t("mod.graphic")} description={t("mod.graphic_desc")} value={graphicFilter} onChange={(v) => saveFilter("awaj-graphic-filter", "graphic_filter", v, setGraphicFilter)} />
+          <ContentFilterRow label={t("mod.nudity")} description={t("mod.nudity_desc")} value={nudityFilter} onChange={(v) => saveFilter("awaj-nudity-filter", "nudity_filter", v, setNudityFilter)} />
         </div>
 
         <div className="h-20" />
