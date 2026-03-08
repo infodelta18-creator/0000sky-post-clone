@@ -13,6 +13,7 @@ import Composer from "@/components/Composer";
 import ImageGrid from "@/components/ImageGrid";
 import RichContent from "@/components/RichContent";
 import VideoPlayer from "@/components/VideoPlayer";
+import EmbedPlayer from "@/components/EmbedPlayer";
 import { useTranslation } from "@/i18n/LanguageContext";
 
 export default function PostDetail() {
