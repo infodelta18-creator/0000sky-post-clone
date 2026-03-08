@@ -724,12 +724,55 @@ function BlockedSection({ renderBack, setSection }: { renderBack: (t: string, on
 function AppearanceSection({ renderBack }: { renderBack: (t: string) => React.ReactNode }) {
   const { theme, setTheme } = useTheme();
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const [colorMode, setColorMode] = useState(theme || "system");
+  const [darkTheme, setDarkTheme] = useState(() => localStorage.getItem("awaj-dark-theme") || "dim");
+  const [fontFamily, setFontFamily] = useState(() => localStorage.getItem("awaj-font-family") || "theme");
   const [fontSize, setFontSize] = useState(() => localStorage.getItem("awaj-font-size") || "medium");
+  const [loaded, setLoaded] = useState(false);
 
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("appearance_settings").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (data) {
+        const d = data as any;
+        if (d.color_mode) { setColorMode(d.color_mode); setTheme(d.color_mode); }
+        if (d.dark_theme) { setDarkTheme(d.dark_theme); localStorage.setItem("awaj-dark-theme", d.dark_theme); document.documentElement.setAttribute("data-dark-theme", d.dark_theme); }
+        if (d.font_family) { setFontFamily(d.font_family); localStorage.setItem("awaj-font-family", d.font_family); document.documentElement.setAttribute("data-font-family", d.font_family); }
+        if (d.font_size) { setFontSize(d.font_size); localStorage.setItem("awaj-font-size", d.font_size); document.documentElement.setAttribute("data-font-size", d.font_size); }
+      }
+      setLoaded(true);
+    });
+  }, [user]);
+
+  const persistSetting = async (updates: Record<string, any>) => {
+    if (!user) return;
+    const { data: existing } = await supabase.from("appearance_settings").select("id").eq("user_id", user.id).maybeSingle();
+    if (existing) {
+      await supabase.from("appearance_settings").update({ ...updates, updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
+    } else {
+      await supabase.from("appearance_settings").insert({ user_id: user.id, ...updates } as any);
+    }
+  };
+
+  const handleColorMode = (v: string) => {
+    setColorMode(v); setTheme(v);
+    persistSetting({ color_mode: v });
+  };
+  const handleDarkTheme = (v: string) => {
+    setDarkTheme(v); localStorage.setItem("awaj-dark-theme", v);
+    document.documentElement.setAttribute("data-dark-theme", v);
+    persistSetting({ dark_theme: v });
+  };
+  const handleFontFamily = (v: string) => {
+    setFontFamily(v); localStorage.setItem("awaj-font-family", v);
+    document.documentElement.setAttribute("data-font-family", v);
+    persistSetting({ font_family: v });
+  };
   const handleFontSize = (size: string) => {
-    setFontSize(size);
-    localStorage.setItem("awaj-font-size", size);
+    setFontSize(size); localStorage.setItem("awaj-font-size", size);
     document.documentElement.setAttribute("data-font-size", size);
+    persistSetting({ font_size: size });
   };
 
   return (
@@ -737,6 +780,7 @@ function AppearanceSection({ renderBack }: { renderBack: (t: string) => React.Re
       {renderBack(t("settings.appearance"))}
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-6">
+          {/* Color mode */}
           <div>
             <div className="flex items-center gap-3 mb-3">
               <Monitor className="h-5 w-5 text-muted-foreground" strokeWidth={1.75} />
@@ -748,11 +792,47 @@ function AppearanceSection({ renderBack }: { renderBack: (t: string) => React.Re
                 { value: "light", label: t("appearance.light") },
                 { value: "dark", label: t("appearance.dark") },
               ]}
-              value={theme || "system"}
-              onChange={(v) => setTheme(v)}
+              value={colorMode}
+              onChange={handleColorMode}
             />
           </div>
+
+          {/* Dark theme */}
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <Moon className="h-5 w-5 text-muted-foreground" strokeWidth={1.75} />
+              <span className="text-[15px] font-semibold text-foreground">Dark theme</span>
+            </div>
+            <SegmentedControl
+              options={[
+                { value: "dim", label: "Dim" },
+                { value: "dark", label: "Dark" },
+              ]}
+              value={darkTheme}
+              onChange={handleDarkTheme}
+            />
+          </div>
+
           <div className="border-t border-border" />
+
+          {/* Font */}
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <span className="text-lg font-bold text-foreground leading-none">Aa</span>
+              <span className="text-[15px] font-semibold text-foreground">Font</span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3 ml-9">For the best experience, we recommend using the theme font.</p>
+            <SegmentedControl
+              options={[
+                { value: "system", label: t("appearance.system") },
+                { value: "theme", label: "Theme" },
+              ]}
+              value={fontFamily}
+              onChange={handleFontFamily}
+            />
+          </div>
+
+          {/* Font size */}
           <div>
             <div className="flex items-center gap-3 mb-3">
               <Type className="h-5 w-5 text-muted-foreground" strokeWidth={1.75} />
