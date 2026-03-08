@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Repeat2, Share, Bookmark, BookmarkCheck, Quote } from "lucide-react";
+import { Heart, MessageCircle, Repeat2, Forward, Bookmark, BookmarkCheck, Quote } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { timeAgo } from "@/lib/time";
 import { useNavigate } from "react-router-dom";
@@ -253,7 +253,7 @@ export default function PostCard({
               className="group flex items-center gap-1 rounded-full p-1.5 text-muted-foreground transition-colors hover:text-primary"
               onClick={handleShare}
             >
-              <Share className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              <Forward className="h-[18px] w-[18px]" strokeWidth={1.75} />
             </button>
             <PostCardMenu
               postId={id}
