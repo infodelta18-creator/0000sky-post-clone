@@ -17,6 +17,7 @@ export default function Messages() {
   const { user } = useAuth();
   const [newChatOpen, setNewChatOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { t } = useTranslation();
 
   const { data: conversations = [] } = useQuery({
