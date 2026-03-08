@@ -394,6 +394,11 @@ export default function Profile() {
       {isOwnProfile && (
         <GoLiveDialog open={liveOpen} onOpenChange={setLiveOpen} profile={profile} />
       )}
+
+      {/* Live Stream Viewer Dialog */}
+      {profileLiveStatus && (
+        <LiveViewerDialog open={liveViewerOpen} onOpenChange={setLiveViewerOpen} liveStatus={profileLiveStatus} profile={profile} />
+      )}
     </div>
   );
 }
