@@ -19,7 +19,14 @@ type FeedTab = "discover" | "following" | "whats-hot";
 
 export default function Home() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<FeedTab>("discover");
+  const [tab, setTab] = useState<FeedTab>(() => {
+    const saved = localStorage.getItem("home_feed_tab");
+    return saved === "following" || saved === "whats-hot" ? saved : "discover";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("home_feed_tab", tab);
+  }, [tab]);
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerAutoImage, setComposerAutoImage] = useState(false);
   const [showTopics, setShowTopics] = useState(true);
