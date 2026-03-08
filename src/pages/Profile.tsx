@@ -648,6 +648,7 @@ function GoLiveDialog({ open, onOpenChange, profile }: {
 }) {
   const { user } = useAuth();
   const [liveLink, setLiveLink] = useState("");
+  const [streamType, setStreamType] = useState<"video" | "audio">("video");
   const [saving, setSaving] = useState(false);
 
   const { data: liveStatus } = useQuery({
@@ -664,16 +665,24 @@ function GoLiveDialog({ open, onOpenChange, profile }: {
 
   const detectedPlatform = detectPlatform(liveLink);
 
+  // Auto-detect stream type from platform
+  useEffect(() => {
+    if (detectedPlatform) {
+      setStreamType(detectedPlatform.type);
+    }
+  }, [detectedPlatform]);
+
   const handleGoLive = async () => {
     if (!user || !liveLink.trim()) return;
     setSaving(true);
     const { data: existing } = await supabase.from("live_status").select("id").eq("user_id", user.id).maybeSingle();
     if (existing) {
-      await supabase.from("live_status").update({ live_link: liveLink, is_live: true, started_at: new Date().toISOString(), updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
+      await supabase.from("live_status").update({ live_link: liveLink, is_live: true, stream_type: streamType, started_at: new Date().toISOString(), updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
     } else {
-      await supabase.from("live_status").insert({ user_id: user.id, live_link: liveLink, is_live: true } as any);
+      await supabase.from("live_status").insert({ user_id: user.id, live_link: liveLink, is_live: true, stream_type: streamType } as any);
     }
     queryClient.invalidateQueries({ queryKey: ["liveStatus"] });
+    queryClient.invalidateQueries({ queryKey: ["allLiveStatuses"] });
     toast.success("You are now live!");
     setSaving(false);
     onOpenChange(false);
@@ -683,6 +692,7 @@ function GoLiveDialog({ open, onOpenChange, profile }: {
     if (!user) return;
     await supabase.from("live_status").update({ is_live: false, updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
     queryClient.invalidateQueries({ queryKey: ["liveStatus"] });
+    queryClient.invalidateQueries({ queryKey: ["allLiveStatuses"] });
     toast.success("Live stream ended");
     onOpenChange(false);
   };
