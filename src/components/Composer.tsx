@@ -413,6 +413,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
         </DialogContent>
       </Dialog>
       <InteractionSettings open={interactionOpen} onOpenChange={setInteractionOpen} onSave={(label) => setInteractionLabel(label)} />
+      <GifPicker open={gifPickerOpen} onOpenChange={setGifPickerOpen} onSelect={(url) => setSelectedGif(url)} />
     </>
   );
 }
