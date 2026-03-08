@@ -15,11 +15,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # Android SDK ও JDK-এর পাথ এনভায়রনমেন্ট ভেরিয়েবল হিসেবে সেট করা
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      # JAVA_HOME আগে থেকেই actions/setup-java সেট করে দেয়
 
     defaults:
       run:
@@ -49,7 +47,10 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      # ---------- টেম্পোরারি সাইনিং কী (প্লে স্টোর ছাড়া) ----------
+      - name: Install expect
+        run: sudo apt-get update && sudo apt-get install -y expect
+
+      # ---------- টেম্পোরারি সাইনিং কী ----------
       - name: Generate temporary keystore
         run: |
           keytool -genkeypair \
@@ -63,21 +64,25 @@ jobs:
             -keysize 2048
           echo "✅ Temporary keystore created."
 
-      # ---------- শুধু আগের বিল্ড ফাইলগুলো মুছি (প্রজেক্ট ফাইল রাখি) ----------
+      # ---------- শুধু বিল্ড ফাইল মুছি, প্রজেক্ট স্ট্রাকচার রাখি ----------
       - name: Clean previous build files
         run: |
-          rm -rf ./app/build ./app/.gradle ./build ./.gradle ./gradle ./local.properties 2>/dev/null || true
+          rm -rf ./app/build ./build ./.gradle ./gradle ./local.properties 2>/dev/null || true
           echo "🧹 Old build files removed."
 
-      # ---------- TWA প্রজেক্ট ইনিশিয়ালাইজ (সম্পূর্ণ non‑interactive) ----------
+      # ---------- TWA প্রজেক্ট ইনিশিয়ালাইজ (Expect দিয়ে সব প্রশ্নের উত্তর) ----------
       - name: Initialize TWA project from manifest
         run: |
-          bubblewrap init \
-            --manifest="${{ env.MANIFEST_URL }}" \
-            --directory="." \
-            --skipPwaValidation \
-            --androidSdkPath="$ANDROID_HOME" \
-            --jdkPath="$JAVA_HOME"
+          expect << EOF
+          set timeout 30
+          spawn bubblewrap init --manifest="${{ env.MANIFEST_URL }}" --skipPwaValidation --directory=.
+          expect {
+            "*install the JDK*" { send "n\r"; exp_continue }
+            "*Path to your existing JDK*" { send "$JAVA_HOME\r"; exp_continue }
+            "*Path to your existing Android SDK*" { send "$ANDROID_HOME\r"; exp_continue }
+            eof
+          }
+          EOF
           echo "✅ TWA project initialized."
 
       # ---------- বিল্ড (APK + AAB) ----------
@@ -90,7 +95,7 @@ jobs:
             --signingKeyPassword=android \
             --signingKeyStorePassword=android
 
-      # ---------- আর্টিফ্যাক্ট শনাক্ত ও আপলোড ----------
+      # ---------- আর্টিফ্যাক্ট আপলোড ----------
       - name: Locate APK and AAB
         id: locate
         run: |
