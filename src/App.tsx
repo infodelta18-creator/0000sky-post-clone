@@ -58,7 +58,7 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
 function RootRoute() {
   const { user, loading } = useAuth();
   if (loading) return <div className="flex min-h-screen items-center justify-center"><div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>;
-  if (user) return <Navigate to="/home" replace />;
+  if (user) return <ProtectedRoute><AppLayout /></ProtectedRoute>;
   return <LandingPage />;
 }
 
@@ -66,7 +66,7 @@ function RootRoute() {
 function ExploreRoute() {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (user) return <Navigate to="/home" replace />;
+  if (user) return <Navigate to="/" replace />;
   return <PublicFeed />;
 }
 
@@ -80,12 +80,8 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <Routes>
-              <Route path="/" element={<RootRoute />} />
-              <Route path="/explore" element={<ExploreRoute />} />
-              <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-                <Route path="/home" element={<Home />} />
+              <Route path="/" element={<RootRoute />}>
+                <Route index element={<Home />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/feeds" element={<Feeds />} />
                 <Route path="/feeds/settings" element={<FeedSettings />} />
