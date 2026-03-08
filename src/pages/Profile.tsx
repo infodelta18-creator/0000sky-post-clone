@@ -9,7 +9,7 @@ import { ArrowLeft, MoreHorizontal, Camera, Link2, Search, ListFilter, Radio, Be
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import FollowListDialog from "@/components/FollowListDialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
