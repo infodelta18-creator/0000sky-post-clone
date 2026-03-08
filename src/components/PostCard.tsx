@@ -256,9 +256,9 @@ export default function PostCard({
               onClick={handleBookmark}
               fill={bookmarked || isBookmarked}
             />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <button className="group flex items-center gap-1 rounded-full p-1.5 text-muted-foreground transition-colors hover:text-primary">
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                <button className="group flex items-center gap-1 rounded-full p-1.5 text-muted-foreground transition-colors hover:text-primary" onTouchEnd={(e) => { e.stopPropagation(); }}>
                   <Forward className="h-[18px] w-[18px]" strokeWidth={1.75} style={{ filter: 'drop-shadow(0.4px 0px 0px currentColor)' }} />
                 </button>
               </DropdownMenuTrigger>
