@@ -1299,6 +1299,15 @@ function EditProfileDialog({ open, onOpenChange, profile, onSaved }: any) {
               className="mt-1 bg-secondary/50 border-0 rounded-lg resize-none" />
           </div>
         </div>
+
+        {/* Image Crop Dialog */}
+        <ImageCropDialog
+          open={cropOpen}
+          onOpenChange={setCropOpen}
+          imageSrc={cropSrc}
+          cropShape={cropShape}
+          onCropComplete={handleCropComplete}
+        />
       </DialogContent>
     </Dialog>
   );
