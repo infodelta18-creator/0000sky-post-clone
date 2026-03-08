@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Image as ImageIcon, Globe, ChevronDown, Video, Loader2 } from "lucide-react";
+import { X, Image as ImageIcon, Globe, ChevronDown, Video, Loader2, Link2 } from "lucide-react";
 import { convertToWebP } from "@/lib/imageUtils";
 import { processVideo, uploadVideo } from "@/lib/videoUtils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +13,7 @@ import { timeAgo } from "@/lib/time";
 import RichContent from "@/components/RichContent";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Progress } from "@/components/ui/progress";
+import EmbedPlayer, { isEmbeddableUrl, getEmbedInfo } from "@/components/EmbedPlayer";
 
 interface QuotePostData {
   id: string; content: string; authorName: string; authorHandle: string;
@@ -45,8 +46,14 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
   const [videoProcessStage, setVideoProcessStage] = useState("");
   const [videoProcessProgress, setVideoProcessProgress] = useState(0);
 
+  // Embed state
+  const [embedUrl, setEmbedUrl] = useState("");
+  const [embedInputOpen, setEmbedInputOpen] = useState(false);
+  const [confirmedEmbedUrl, setConfirmedEmbedUrl] = useState<string | null>(null);
+
   const hasVideo = !!videoFile;
   const hasImages = images.length > 0;
+  const hasEmbed = !!confirmedEmbedUrl;
 
   // Set default interaction label
   useEffect(() => {
@@ -64,7 +71,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
     }
   }, [open, autoOpenImagePicker]);
 
-  const canPost = (content.trim().length > 0 || images.length > 0 || hasVideo) && !overLimit && !videoProcessing;
+  const canPost = (content.trim().length > 0 || images.length > 0 || hasVideo || hasEmbed) && !overLimit && !videoProcessing;
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -117,6 +124,29 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
     setVideoPreview(null);
   };
 
+  const handleAddEmbed = () => {
+    const trimmed = embedUrl.trim();
+    if (!trimmed) return;
+    try {
+      new URL(trimmed); // validate URL
+    } catch {
+      toast.error("Please enter a valid URL");
+      return;
+    }
+    const info = getEmbedInfo(trimmed);
+    if (!info) {
+      toast.error("This URL is not supported for embedding. Try YouTube, Facebook, Twitch, Vimeo, VDO.Ninja, Kick, Rumble, Dailymotion, or Streamable.");
+      return;
+    }
+    setConfirmedEmbedUrl(trimmed);
+    setEmbedInputOpen(false);
+    setEmbedUrl("");
+  };
+
+  const removeEmbed = () => {
+    setConfirmedEmbedUrl(null);
+  };
+
   const uploadImage = async (file: File, postId: string, position: number) => {
     const path = `${user!.id}/${postId}/${position}.webp`;
     const { error } = await supabase.storage.from("profiles").upload(path, file, { contentType: "image/webp" });
@@ -150,6 +180,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
         author_id: user.id, content: content.trim(), parent_id: parentId || null, quote_post_id: quotePost?.id || null,
       };
       if (videoUrl) insertData.video_url = videoUrl;
+      if (confirmedEmbedUrl) insertData.embed_url = confirmedEmbedUrl;
 
       const { data: post, error } = await supabase.from("posts").insert(insertData).select("id").single();
       if (error || !post) { toast.error(t("composer.failed_post")); return; }
@@ -183,7 +214,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
       }
       images.forEach((img) => URL.revokeObjectURL(img.preview));
       if (videoPreview) URL.revokeObjectURL(videoPreview);
-      setContent(""); setImages([]); setVideoFile(null); setVideoPreview(null);
+      setContent(""); setImages([]); setVideoFile(null); setVideoPreview(null); setConfirmedEmbedUrl(null); setEmbedUrl(""); setEmbedInputOpen(false);
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
       onOpenChange(false);
@@ -195,7 +226,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
     if (videoProcessing) return; // Don't close while processing
     images.forEach((img) => URL.revokeObjectURL(img.preview));
     if (videoPreview) URL.revokeObjectURL(videoPreview);
-    setContent(""); setImages([]); setVideoFile(null); setVideoPreview(null); onOpenChange(false);
+    setContent(""); setImages([]); setVideoFile(null); setVideoPreview(null); setConfirmedEmbedUrl(null); setEmbedUrl(""); setEmbedInputOpen(false); onOpenChange(false);
   };
 
   const ringRadius = 10;
@@ -261,6 +292,41 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
                 </div>
               )}
 
+              {/* Embed URL input */}
+              {embedInputOpen && !confirmedEmbedUrl && (
+                <div className="mt-2 rounded-xl border border-border p-3">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Paste a video URL from YouTube, Facebook, Twitch, Vimeo, VDO.Ninja, Kick, Rumble, Dailymotion, or Streamable</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={embedUrl}
+                      onChange={(e) => setEmbedUrl(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddEmbed(); } }}
+                      placeholder="https://youtube.com/watch?v=..."
+                      className="flex-1 rounded-lg border border-border bg-muted px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                      autoFocus
+                    />
+                    <button onClick={handleAddEmbed} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors">
+                      Add
+                    </button>
+                    <button onClick={() => { setEmbedInputOpen(false); setEmbedUrl(""); }} className="rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent transition-colors">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Embed preview */}
+              {confirmedEmbedUrl && (
+                <div className="mt-2 relative">
+                  <EmbedPlayer url={confirmedEmbedUrl} />
+                  <button onClick={removeEmbed}
+                    className="absolute top-2.5 right-2.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+
               {quotePost && (
                 <div className="mt-2 rounded-xl border border-border p-3">
                   <div className="flex items-center gap-1.5 text-sm">
@@ -294,6 +360,14 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
                 disabled={hasImages || hasVideo || videoProcessing}
               >
                 <Video className="h-5 w-5" strokeWidth={1.75} />
+              </button>
+              <button
+                onClick={() => setEmbedInputOpen(!embedInputOpen)}
+                className={`rounded-full p-2 transition-colors ${hasVideo || hasEmbed ? "text-muted-foreground/40 cursor-not-allowed" : "text-primary hover:bg-primary/10"}`}
+                disabled={hasVideo || hasEmbed}
+                title="Embed video link"
+              >
+                <Link2 className="h-5 w-5" strokeWidth={1.75} />
               </button>
               <button className="rounded-full p-2 text-primary transition-colors hover:bg-primary/10">
                 <span className="text-xs font-bold border-2 border-primary rounded px-1">GIF</span>

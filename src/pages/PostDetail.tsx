@@ -13,6 +13,7 @@ import Composer from "@/components/Composer";
 import ImageGrid from "@/components/ImageGrid";
 import RichContent from "@/components/RichContent";
 import VideoPlayer from "@/components/VideoPlayer";
+import EmbedPlayer from "@/components/EmbedPlayer";
 import { useTranslation } from "@/i18n/LanguageContext";
 
 export default function PostDetail() {
@@ -27,7 +28,7 @@ export default function PostDetail() {
     queryFn: async () => {
       const { data } = await supabase
         .from("posts")
-        .select(`id, content, created_at, parent_id, author_id, quote_post_id, video_url, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
+        .select(`id, content, created_at, parent_id, author_id, quote_post_id, video_url, embed_url, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
         .eq("id", postId!)
         .single();
       if (!data) return null;
@@ -66,7 +67,7 @@ export default function PostDetail() {
     queryFn: async () => {
       const { data } = await supabase
         .from("posts")
-        .select(`id, content, created_at, parent_id, author_id, video_url, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
+        .select(`id, content, created_at, parent_id, author_id, video_url, embed_url, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
         .eq("parent_id", postId!)
         .order("created_at", { ascending: true });
       if (!data || data.length === 0) return [];
@@ -109,6 +110,7 @@ export default function PostDetail() {
           createdAt: r.created_at,
           images: postImages[r.id],
           videoUrl: (r as any).video_url || null,
+          embedUrl: (r as any).embed_url || null,
           likeCount: likeCounts[r.id] || 0,
           replyCount: replyCounts[r.id] || 0,
           repostCount: repostCounts[r.id] || 0,
@@ -183,7 +185,12 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/* Quoted post embed */}
+        {(post as any).embed_url && (
+          <div className="mt-3">
+            <EmbedPlayer url={(post as any).embed_url} />
+          </div>
+        )}
+
         {(post as any).quotePost && (
           <div
             className="mt-3 rounded-xl border border-border p-3 cursor-pointer hover:bg-accent/50 transition-colors"
