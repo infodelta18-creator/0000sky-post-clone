@@ -133,11 +133,16 @@ export default function PostCard({
     queryClient.invalidateQueries({ queryKey: ["bookmark", id] });
   };
 
-  const handleShare = (e: React.MouseEvent) => {
+  const handleCopyLink = (e: React.MouseEvent) => {
     e.stopPropagation();
     const postUrl = `${window.location.origin}/post/${id}`;
     navigator.clipboard.writeText(postUrl);
     toast.success("Link copied!");
+  };
+
+  const handleSendDM = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/messages?share=${id}`);
   };
 
   if (hidden) return null;
