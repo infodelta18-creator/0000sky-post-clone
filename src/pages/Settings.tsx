@@ -58,7 +58,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm">
+      <div className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background/95 px-4 py-1.5 backdrop-blur-sm">
         <button onClick={() => navigate(-1)} className="p-1">
           <ChevronLeft className="h-5 w-5 text-foreground" />
         </button>
@@ -1037,7 +1037,7 @@ function AboutSection({ renderBack }: { renderBack: (t: string) => React.ReactNo
   if (subPage === "tos") {
     return (
       <div className="flex flex-col h-full">
-        <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm">
+        <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-1.5 backdrop-blur-sm">
           <button onClick={() => setSubPage(null)} className="p-1 rounded-full hover:bg-accent"><ChevronLeft className="h-5 w-5" /></button>
           <h2 className="text-lg font-bold">{t("about.tos")}</h2>
         </div>
@@ -1068,7 +1068,7 @@ function AboutSection({ renderBack }: { renderBack: (t: string) => React.ReactNo
   if (subPage === "privacy") {
     return (
       <div className="flex flex-col h-full">
-        <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm">
+        <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-1.5 backdrop-blur-sm">
           <button onClick={() => setSubPage(null)} className="p-1 rounded-full hover:bg-accent"><ChevronLeft className="h-5 w-5" /></button>
           <h2 className="text-lg font-bold">{t("about.privacy")}</h2>
         </div>
@@ -1099,7 +1099,7 @@ function AboutSection({ renderBack }: { renderBack: (t: string) => React.ReactNo
   if (subPage === "status") {
     return (
       <div className="flex flex-col h-full">
-        <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm">
+        <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-1.5 backdrop-blur-sm">
           <button onClick={() => setSubPage(null)} className="p-1 rounded-full hover:bg-accent"><ChevronLeft className="h-5 w-5" /></button>
           <h2 className="text-lg font-bold">{t("about.status")}</h2>
         </div>
