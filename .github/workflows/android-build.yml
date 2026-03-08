@@ -8,9 +8,6 @@ on:
       - '.github/workflows/android-build.yml'
 
 env:
-  # লোকাল ম্যানিফেস্ট ফাইল (আপনার দেওয়া twa-manifest.json)
-  LOCAL_MANIFEST: "twa-manifest.json"
-  # রিমোট ওয়েব ম্যানিফেস্ট URL (এখন সরাসরি ব্যবহার করছি)
   MANIFEST_URL: "https://sky-post-clone.lovable.app/manifest.json"
   TWA_DIR: "android-twa"
 
@@ -18,7 +15,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # Android SDK-এর পাথ – এটি bubblewrap-কে প্রম্প্ট করা থেকে বিরত রাখবে
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
@@ -51,7 +47,7 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      # ---------- টেম্পোরারি সাইনিং কী (প্লে স্টোর আপলোড ছাড়া ব্যবহারের জন্য) ----------
+      # ---------- টেম্পোরারি সাইনিং কী (প্লে স্টোর ছাড়া) ----------
       - name: Generate temporary keystore
         run: |
           keytool -genkeypair \
@@ -65,22 +61,31 @@ jobs:
             -keysize 2048
           echo "✅ Temporary keystore created."
 
-      # ---------- পুরোনো বিল্ড ফাইল পরিষ্কার ----------
       - name: Clean previous build files
         run: |
           rm -rf ./app ./gradle ./build ./gradlew ./settings.gradle ./build.gradle ./local.properties 2>/dev/null || true
           echo "🧹 Old build files removed."
 
-      # ---------- TWA প্রজেক্ট ইনিশিয়ালাইজ (সরাসরি ওয়েব ম্যানিফেস্ট URL দিয়ে) ----------
+      # ---------- INSTALL EXPECT (ইন্টারঅ্যাক্টিভ প্রম্প্টের জন্য) ----------
+      - name: Install expect
+        run: sudo apt-get update && sudo apt-get install -y expect
+
+      # ---------- TWA প্রজেক্ট ইনিশিয়ালাইজ (Expect দিয়ে সব প্রশ্নের উত্তর) ----------
       - name: Initialize TWA project from manifest
         run: |
-          bubblewrap init \
-            --manifest="${{ env.MANIFEST_URL }}" \
-            --skipPwaValidation \
-            --directory="."
+          expect << EOF
+          set timeout 30
+          spawn bubblewrap init --manifest="${{ env.MANIFEST_URL }}" --skipPwaValidation --directory=.
+          expect {
+            "*install the JDK*" { send "n\r"; exp_continue }
+            "*Path to your existing JDK*" { send "$JAVA_HOME\r"; exp_continue }
+            "*Path to your existing Android SDK*" { send "$ANDROID_HOME\r"; exp_continue }
+            eof
+          }
+          EOF
           echo "✅ TWA project initialized."
 
-      # ---------- বিল্ড (APK + AAB) ----------
+      # ---------- বিল্ড (এখনো কোনো প্রম্প্ট আসলে printf দিয়ে হ্যান্ডেল) ----------
       - name: Build TWA (APK + AAB)
         run: |
           printf "n\n" | bubblewrap build \
@@ -90,7 +95,7 @@ jobs:
             --signingKeyPassword=android \
             --signingKeyStorePassword=android
 
-      # ---------- আর্টিফ্যাক্ট শনাক্ত ও আপলোড ----------
+      # ---------- আর্টিফ্যাক্ট আপলোড ----------
       - name: Locate APK and AAB
         id: locate
         run: |
