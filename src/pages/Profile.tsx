@@ -1169,10 +1169,10 @@ function EditProfileDialog({ open, onOpenChange, profile, onSaved }: any) {
       const updates: any = { display_name: displayName, bio };
 
       if (avatarFile) {
-        updates.avatar_url = await uploadImage(avatarFile, `${profile.id}/avatar`);
+        updates.avatar_url = await uploadImage(avatarFile);
       }
       if (bannerFile) {
-        updates.banner_url = await uploadImage(bannerFile, `${profile.id}/banner`);
+        updates.banner_url = await uploadImage(bannerFile);
       }
 
       const { error } = await supabase.from("profiles").update(updates).eq("id", profile.id);
