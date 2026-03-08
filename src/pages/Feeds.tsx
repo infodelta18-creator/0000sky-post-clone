@@ -46,7 +46,7 @@ export default function Feeds() {
 
   return (
     <div className="flex flex-col">
-      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm">
+      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/95 px-4 py-1.5 backdrop-blur-sm">
         <button onClick={() => navigate(-1)} className="p-1"><ArrowLeft className="h-5 w-5 text-foreground" /></button>
         <h2 className="text-lg font-bold">{t("nav.feeds")}</h2>
         <button onClick={() => navigate("/feeds/settings")} className="p-1"><Settings className="h-5 w-5 text-muted-foreground" /></button>

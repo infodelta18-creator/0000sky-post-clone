@@ -82,7 +82,7 @@ export default function Notifications() {
     <div className="flex flex-col min-h-screen">
       <MobileDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-1.5">
           <div className="flex items-center gap-3">
             <button onClick={() => setDrawerOpen(true)} className="p-1 lg:hidden"><Menu className="h-6 w-6 text-foreground" strokeWidth={2} /></button>
             <h2 className="text-xl font-bold">{t("notif.notifications")}</h2>
