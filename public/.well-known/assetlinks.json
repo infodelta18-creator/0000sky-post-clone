@@ -5,7 +5,7 @@
       "namespace": "android_app",
       "package_name": "app.lovable.awaj",
       "sha256_cert_fingerprints": [
-        "TODO:REPLACE_WITH_YOUR_SIGNING_KEY_SHA256_FINGERPRINT"
+        "TO_BE_FILLED_AFTER_BUILD"
       ]
     }
   }
