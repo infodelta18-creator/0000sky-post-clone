@@ -13,6 +13,8 @@ import { useRef, useState, useEffect } from "react";
 import FollowListDialog from "@/components/FollowListDialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useLiveViewerCount, useLiveViewerPresence } from "@/hooks/use-live-viewers";
+import LiveViewerCount from "@/components/LiveViewerCount";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -337,7 +339,10 @@ export default function Profile() {
                 {profileLiveStatus.stream_type === "audio" ? "Audio Podcast" : (detectPlatform(profileLiveStatus.live_link)?.name || "Live Stream")}
               </p>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">{profileLiveStatus.live_link}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-xs text-muted-foreground truncate">{profileLiveStatus.live_link}</p>
+              <LiveViewerCount liveStatusId={profileLiveStatus.id} isAudio={profileLiveStatus.stream_type === "audio"} />
+            </div>
           </div>
           <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
         </button>
@@ -862,6 +867,8 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
   const platform = detectPlatform(link);
   const embedUrl = getEmbedUrl(link);
   const fullLink = link.startsWith("http") ? link : `https://${link}`;
+  const { data: viewerCount = 0 } = useLiveViewerCount(liveStatus?.id);
+  useLiveViewerPresence(liveStatus?.id, open);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -886,6 +893,11 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
                       {platform.name}
                     </span>
                   </>
+                )}
+                {viewerCount > 0 && (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                    · {viewerCount} {isAudio ? "listening" : "watching"}
+                  </span>
                 )}
               </div>
             </div>
