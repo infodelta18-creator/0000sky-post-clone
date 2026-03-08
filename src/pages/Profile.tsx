@@ -858,6 +858,7 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
   open: boolean; onOpenChange: (v: boolean) => void; liveStatus: any; profile: any;
 }) {
   const link = liveStatus?.live_link || "";
+  const isAudio = liveStatus?.stream_type === "audio";
   const platform = detectPlatform(link);
   const embedUrl = getEmbedUrl(link);
   const fullLink = link.startsWith("http") ? link : `https://${link}`;
@@ -876,6 +877,7 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
               <p className="text-sm font-bold leading-tight">{profile.display_name}</p>
               <div className="flex items-center gap-1.5">
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold text-destructive animate-pulse">● LIVE</span>
+                {isAudio && <Headphones className="h-3 w-3 text-muted-foreground" />}
                 {platform && (
                   <>
                     <span className="text-muted-foreground text-[10px]">on</span>
@@ -893,8 +895,10 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
           </button>
         </div>
 
-        {/* Embed or fallback */}
-        {embedUrl ? (
+        {/* Content: Audio visualizer or Video embed */}
+        {isAudio ? (
+          <AudioPodcastVisual profile={profile} platform={platform} />
+        ) : embedUrl ? (
           <div className="aspect-video w-full bg-black">
             <iframe
               src={embedUrl}
@@ -911,7 +915,7 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
             </div>
             <h3 className="text-lg font-bold text-foreground mb-1">{profile.display_name} is live!</h3>
             <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-              This stream can't be embedded directly. Click the button below to watch on {platform?.name || "the streaming platform"}.
+              This stream can't be embedded directly. Click the button below to {isAudio ? "listen" : "watch"} on {platform?.name || "the streaming platform"}.
             </p>
           </div>
         )}
@@ -921,11 +925,77 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
           <p className="text-xs text-muted-foreground truncate flex-1 mr-3">{link}</p>
           <Button size="sm" className="rounded-full gap-1.5" onClick={() => window.open(fullLink, "_blank", "noopener,noreferrer")}>
             <ExternalLink className="h-3.5 w-3.5" />
-            Watch on {platform?.name || "site"}
+            {isAudio ? "Listen" : "Watch"} on {platform?.name || "site"}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ---- Audio Podcast Visualizer ---- */
+function AudioPodcastVisual({ profile, platform }: { profile: any; platform: any }) {
+  return (
+    <div className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-primary/10">
+      {/* Animated background circles */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-10 -left-10 h-40 w-40 rounded-full bg-primary/10 animate-pulse" style={{ animationDuration: "3s" }} />
+        <div className="absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-destructive/10 animate-pulse" style={{ animationDuration: "2.5s" }} />
+        <div className="absolute top-1/2 left-1/4 h-20 w-20 rounded-full bg-primary/5 animate-pulse" style={{ animationDuration: "4s" }} />
+      </div>
+
+      <div className="relative flex flex-col items-center py-12 px-6">
+        {/* Large avatar with audio ring */}
+        <div className="relative mb-6">
+          <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" style={{ animationDuration: "2s", scale: "1.15" }} />
+          <Avatar className="h-28 w-28 ring-4 ring-primary/30 ring-offset-4 ring-offset-background shadow-2xl">
+            <AvatarImage src={profile.avatar_url || ""} />
+            <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-bold">
+              {profile.display_name?.[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-destructive text-destructive-foreground px-2.5 py-1 rounded-full text-[10px] font-bold shadow-lg">
+            <Mic className="h-3 w-3" />
+            LIVE
+          </div>
+        </div>
+
+        {/* Audio waveform bars */}
+        <div className="flex items-end gap-[3px] h-10 mb-5">
+          {Array.from({ length: 24 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-[3px] rounded-full bg-primary/60"
+              style={{
+                height: `${12 + Math.sin(i * 0.7) * 16 + Math.random() * 8}px`,
+                animation: `pulse ${1.2 + (i % 5) * 0.3}s ease-in-out infinite alternate`,
+                animationDelay: `${i * 0.08}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Info */}
+        <h3 className="text-lg font-bold text-foreground mb-1">{profile.display_name}</h3>
+        <p className="text-sm text-muted-foreground mb-1">@{profile.username}</p>
+        {platform && (
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className={`h-2.5 w-2.5 rounded-full ${platform.color}`} />
+            <span className="text-xs font-medium text-muted-foreground">Streaming on {platform.name}</span>
+          </div>
+        )}
+
+        {/* Listening indicator */}
+        <div className="mt-5 flex items-center gap-2 rounded-full bg-muted/80 backdrop-blur-sm px-4 py-2">
+          <Headphones className="h-4 w-4 text-primary" />
+          <span className="text-xs font-medium text-foreground">Audio Podcast</span>
+          <span className="flex items-center gap-0.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+            <span className="text-[10px] font-bold text-destructive">LIVE</span>
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 
