@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { useAllLiveUsers } from "@/hooks/use-live-status";
+import LiveViewerCount from "@/components/LiveViewerCount";
 
 export default function RightSidebar() {
   const { user } = useAuth();
@@ -91,7 +92,10 @@ export default function RightSidebar() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold flex items-center gap-1">{p.display_name}<VerifiedBadge userId={p.id} /></p>
-                    <p className="truncate text-xs text-muted-foreground">@{p.username}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-xs text-muted-foreground">@{p.username}</p>
+                      <LiveViewerCount liveStatusId={ls.id} isAudio={ls.stream_type === "audio"} />
+                    </div>
                   </div>
                 </div>
               );
