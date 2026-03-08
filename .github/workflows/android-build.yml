@@ -47,9 +47,6 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      - name: Install expect
-        run: sudo apt-get update && sudo apt-get install -y expect
-
       # ---------- টেম্পোরারি সাইনিং কী ----------
       - name: Generate temporary keystore
         run: |
@@ -64,25 +61,24 @@ jobs:
             -keysize 2048
           echo "✅ Temporary keystore created."
 
-      # ---------- শুধু বিল্ড ফাইল মুছি, প্রজেক্ট স্ট্রাকচার রাখি ----------
+      # ---------- শুধু বিল্ড ফাইল মুছি ----------
       - name: Clean previous build files
         run: |
           rm -rf ./app/build ./build ./.gradle ./gradle ./local.properties 2>/dev/null || true
           echo "🧹 Old build files removed."
 
-      # ---------- TWA প্রজেক্ট ইনিশিয়ালাইজ (Expect দিয়ে সব প্রশ্নের উত্তর) ----------
+      # ---------- ম্যানিফেস্ট URL চেক ----------
+      - name: Check manifest URL
+        run: |
+          curl -fI "${{ env.MANIFEST_URL }}" || (echo "❌ Manifest URL is not accessible" && exit 1)
+
+      # ---------- TWA প্রজেক্ট ইনিশিয়ালাইজ (একবারে তিনটি উত্তর) ----------
       - name: Initialize TWA project from manifest
         run: |
-          expect << EOF
-          set timeout 30
-          spawn bubblewrap init --manifest="${{ env.MANIFEST_URL }}" --skipPwaValidation --directory=.
-          expect {
-            "*install the JDK*" { send "n\r"; exp_continue }
-            "*Path to your existing JDK*" { send "$JAVA_HOME\r"; exp_continue }
-            "*Path to your existing Android SDK*" { send "$ANDROID_HOME\r"; exp_continue }
-            eof
-          }
-          EOF
+          printf "n\n$JAVA_HOME\n$ANDROID_HOME\n" | bubblewrap init \
+            --manifest="${{ env.MANIFEST_URL }}" \
+            --skipPwaValidation \
+            --directory="."
           echo "✅ TWA project initialized."
 
       # ---------- বিল্ড (APK + AAB) ----------
