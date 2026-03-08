@@ -143,12 +143,13 @@ export default function Conversation() {
     let imageUrl: string | undefined;
 
     if (imageFile) {
-      const ext = imageFile.name.split(".").pop();
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("chat-images").upload(path, imageFile);
-      if (error) { console.error(error); return; }
-      const { data: urlData } = supabase.storage.from("chat-images").getPublicUrl(path);
-      imageUrl = urlData.publicUrl;
+      const { uploadToCloudinary } = await import("@/lib/cloudinaryUpload");
+      try {
+        imageUrl = await uploadToCloudinary(imageFile);
+      } catch (err) {
+        console.error(err);
+        return;
+      }
     }
 
     await supabase.from("messages").insert({
