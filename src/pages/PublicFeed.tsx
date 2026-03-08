@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, X, ArrowUp } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ArrowUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PostCard from "@/components/PostCard";
 import PostCardSkeleton from "@/components/PostCardSkeleton";
 import AwajLogo from "@/components/AwajLogo";
 import MobileTopBarPublic from "@/components/MobileTopBarPublic";
+import PublicDrawer from "@/components/PublicDrawer";
 
 type FeedTab = "discover" | "feeds";
 
