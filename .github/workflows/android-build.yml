@@ -8,15 +8,20 @@ on:
       - '.github/workflows/android-build.yml'
 
 env:
-  # লোকাল ম্যানিফেস্ট ফাইল (প্রাথমিক)
+  # লোকাল ম্যানিফেস্ট ফাইল (আপনার দেওয়া twa-manifest.json)
   LOCAL_MANIFEST: "twa-manifest.json"
-  # রিমোট ম্যানিফেস্ট URL (যদি লোকাল না থাকে তবেই ব্যবহার হবে)
-  REMOTE_MANIFEST_URL: "https://sky-post-clone.lovable.app/manifest.json"
+  # রিমোট ওয়েব ম্যানিফেস্ট URL (এখন সরাসরি ব্যবহার করছি)
+  MANIFEST_URL: "https://sky-post-clone.lovable.app/manifest.json"
   TWA_DIR: "android-twa"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # Android SDK-এর পাথ – এটি bubblewrap-কে প্রম্প্ট করা থেকে বিরত রাখবে
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
     defaults:
       run:
@@ -46,20 +51,8 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      # ---------- SIGNING KEY ----------
-      - name: Decode keystore from secret (if available)
-        id: keystore
-        run: |
-          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android.keystore
-            echo "keystore_available=true" >> $GITHUB_OUTPUT
-          else
-            echo "keystore_available=false" >> $GITHUB_OUTPUT
-            echo "⚠️ No keystore secret found. A temporary keystore will be generated."
-          fi
-
-      - name: Generate temporary keystore (only if secret missing)
-        if: steps.keystore.outputs.keystore_available == 'false'
+      # ---------- টেম্পোরারি সাইনিং কী (প্লে স্টোর আপলোড ছাড়া ব্যবহারের জন্য) ----------
+      - name: Generate temporary keystore
         run: |
           keytool -genkeypair \
             -alias awaj \
@@ -70,49 +63,24 @@ jobs:
             -validity 10000 \
             -keyalg RSA \
             -keysize 2048
-          echo "✅ Temporary keystore created (for testing only)."
+          echo "✅ Temporary keystore created."
 
-      # ---------- CLEAN OLD BUILD FILES ----------
+      # ---------- পুরোনো বিল্ড ফাইল পরিষ্কার ----------
       - name: Clean previous build files
         run: |
           rm -rf ./app ./gradle ./build ./gradlew ./settings.gradle ./build.gradle ./local.properties 2>/dev/null || true
           echo "🧹 Old build files removed."
 
-      # ---------- INSTALL EXPECT (FOR INTERACTIVE PROMPTS) ----------
-      - name: Install expect
-        run: sudo apt-get update && sudo apt-get install -y expect
-
-      # ---------- DETERMINE MANIFEST SOURCE (LOCAL FIRST) ----------
-      - name: Determine manifest source
-        id: manifest
-        run: |
-          if [ -f "${{ env.LOCAL_MANIFEST }}" ]; then
-            echo "✅ Using local manifest: ${{ env.LOCAL_MANIFEST }}"
-            echo "source=${{ env.LOCAL_MANIFEST }}" >> $GITHUB_OUTPUT
-          elif curl --output /dev/null --silent --head --fail "${{ env.REMOTE_MANIFEST_URL }}"; then
-            echo "⚠️ Local manifest not found, but remote manifest is accessible."
-            echo "source=${{ env.REMOTE_MANIFEST_URL }}" >> $GITHUB_OUTPUT
-          else
-            echo "❌ Neither local manifest nor remote manifest available."
-            exit 1
-          fi
-
-      # ---------- INITIALIZE TWA PROJECT (WITH EXPECT) ----------
+      # ---------- TWA প্রজেক্ট ইনিশিয়ালাইজ (সরাসরি ওয়েব ম্যানিফেস্ট URL দিয়ে) ----------
       - name: Initialize TWA project from manifest
         run: |
-          expect << EOF
-          set timeout 30
-          spawn bubblewrap init --manifest="${{ steps.manifest.outputs.source }}" --skipPwaValidation --directory=.
-          expect {
-            "*install the JDK*" { send "n\r"; exp_continue }
-            "*Path to your existing JDK*" { send "$JAVA_HOME\r"; exp_continue }
-            "*Path to your existing Android SDK*" { send "$ANDROID_HOME\r"; exp_continue }
-            eof
-          }
-          EOF
+          bubblewrap init \
+            --manifest="${{ env.MANIFEST_URL }}" \
+            --skipPwaValidation \
+            --directory="."
           echo "✅ TWA project initialized."
 
-      # ---------- BUILD (NON-INTERACTIVE) ----------
+      # ---------- বিল্ড (APK + AAB) ----------
       - name: Build TWA (APK + AAB)
         run: |
           printf "n\n" | bubblewrap build \
@@ -122,7 +90,7 @@ jobs:
             --signingKeyPassword=android \
             --signingKeyStorePassword=android
 
-      # ---------- LOCATE AND UPLOAD ARTIFACTS ----------
+      # ---------- আর্টিফ্যাক্ট শনাক্ত ও আপলোড ----------
       - name: Locate APK and AAB
         id: locate
         run: |
