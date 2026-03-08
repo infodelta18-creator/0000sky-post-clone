@@ -59,6 +59,7 @@ export default function PostCard({
   const [quoteComposerOpen, setQuoteComposerOpen] = useState(false);
   const [replyComposerOpen, setReplyComposerOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
