@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Image as ImageIcon, Globe, ChevronDown, Video, Loader2 } from "lucide-react";
+import { X, Image as ImageIcon, Globe, ChevronDown, Video, Loader2, Link2 } from "lucide-react";
 import { convertToWebP } from "@/lib/imageUtils";
 import { processVideo, uploadVideo } from "@/lib/videoUtils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +13,7 @@ import { timeAgo } from "@/lib/time";
 import RichContent from "@/components/RichContent";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Progress } from "@/components/ui/progress";
+import EmbedPlayer, { isEmbeddableUrl, getEmbedInfo } from "@/components/EmbedPlayer";
 
 interface QuotePostData {
   id: string; content: string; authorName: string; authorHandle: string;
@@ -45,8 +46,14 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
   const [videoProcessStage, setVideoProcessStage] = useState("");
   const [videoProcessProgress, setVideoProcessProgress] = useState(0);
 
+  // Embed state
+  const [embedUrl, setEmbedUrl] = useState("");
+  const [embedInputOpen, setEmbedInputOpen] = useState(false);
+  const [confirmedEmbedUrl, setConfirmedEmbedUrl] = useState<string | null>(null);
+
   const hasVideo = !!videoFile;
   const hasImages = images.length > 0;
+  const hasEmbed = !!confirmedEmbedUrl;
 
   // Set default interaction label
   useEffect(() => {
@@ -64,7 +71,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
     }
   }, [open, autoOpenImagePicker]);
 
-  const canPost = (content.trim().length > 0 || images.length > 0 || hasVideo) && !overLimit && !videoProcessing;
+  const canPost = (content.trim().length > 0 || images.length > 0 || hasVideo || hasEmbed) && !overLimit && !videoProcessing;
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
