@@ -12,6 +12,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import ImageGrid from "@/components/ImageGrid";
 import RichContent from "@/components/RichContent";
 import VideoPlayer from "@/components/VideoPlayer";
+import EmbedPlayer from "@/components/EmbedPlayer";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Composer from "@/components/Composer";
 
@@ -25,6 +26,7 @@ interface PostCardProps {
   createdAt: string;
   images?: string[];
   videoUrl?: string | null;
+  embedUrl?: string | null;
   likeCount: number;
   replyCount: number;
   repostCount: number;
@@ -43,7 +45,7 @@ interface PostCardProps {
 
 export default function PostCard({
   id, authorId, authorName, authorHandle, authorAvatar,
-  content, createdAt, images, videoUrl, likeCount, replyCount, repostCount,
+  content, createdAt, images, videoUrl, embedUrl, likeCount, replyCount, repostCount,
   isLiked, isReposted, quotePost,
 }: PostCardProps) {
   const [liked, setLiked] = useState(isLiked);
@@ -172,6 +174,8 @@ export default function PostCard({
           {images && images.length > 0 && <ImageGrid images={images} />}
 
           {videoUrl && <VideoPlayer url={videoUrl} />}
+
+          {embedUrl && <EmbedPlayer url={embedUrl} />}
 
           {/* Quoted post embed */}
           {quotePost && (
