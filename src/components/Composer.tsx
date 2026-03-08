@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Image as ImageIcon, Globe, ChevronDown, Video, Loader2, Link2 } from "lucide-react";
-import { convertToWebP } from "@/lib/imageUtils";
+import { convertToAvif } from "@/lib/imageUtils";
 import { processVideo, uploadVideo } from "@/lib/videoUtils";
+import { uploadToCloudinary } from "@/lib/cloudinaryUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -83,7 +84,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
     const files = Array.from(e.target.files || []);
     if (images.length + files.length > 4) { toast.error(t("composer.max_images")); return; }
     try {
-      const converted = await Promise.all(files.map((f) => convertToWebP(f)));
+      const converted = await Promise.all(files.map((f) => convertToAvif(f)));
       const newImages = converted.map((file) => ({ file, preview: URL.createObjectURL(file) }));
       setImages((prev) => [...prev, ...newImages]);
     } catch { toast.error(t("composer.failed_image")); }
@@ -153,12 +154,8 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
     setConfirmedEmbedUrl(null);
   };
 
-  const uploadImage = async (file: File, postId: string, position: number) => {
-    const path = `${user!.id}/${postId}/${position}.webp`;
-    const { error } = await supabase.storage.from("profiles").upload(path, file, { contentType: "image/webp" });
-    if (error) throw error;
-    const { data } = supabase.storage.from("profiles").getPublicUrl(path);
-    return data.publicUrl;
+  const uploadImage = async (file: File): Promise<string> => {
+    return await uploadToCloudinary(file);
   };
 
   const handlePost = async () => {
@@ -191,7 +188,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
       const { data: post, error } = await supabase.from("posts").insert(insertData).select("id").single();
       if (error || !post) { toast.error(t("composer.failed_post")); return; }
       if (images.length > 0) {
-        const urls = await Promise.all(images.map((img, i) => uploadImage(img.file, post.id, i)));
+        const urls = await Promise.all(images.map((img) => uploadImage(img.file)));
         const imageRows = urls.map((url, i) => ({ post_id: post.id, url, position: i }));
         await supabase.from("post_images").insert(imageRows);
       }

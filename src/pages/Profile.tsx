@@ -1158,16 +1158,9 @@ function EditProfileDialog({ open, onOpenChange, profile, onSaved }: any) {
     setBannerPreview(URL.createObjectURL(file));
   };
 
-  const uploadImage = async (file: File, path: string) => {
-    // Remove old file first to avoid extension conflicts
-    await supabase.storage.from("profiles").remove([path]);
-    const { error } = await supabase.storage.from("profiles").upload(path, file, { 
-      upsert: true,
-      contentType: file.type,
-    });
-    if (error) throw error;
-    const { data } = supabase.storage.from("profiles").getPublicUrl(path);
-    return `${data.publicUrl}?t=${Date.now()}`;
+  const uploadImage = async (file: File) => {
+    const { uploadToCloudinary } = await import("@/lib/cloudinaryUpload");
+    return await uploadToCloudinary(file);
   };
 
   const handleSave = async () => {
@@ -1176,10 +1169,10 @@ function EditProfileDialog({ open, onOpenChange, profile, onSaved }: any) {
       const updates: any = { display_name: displayName, bio };
 
       if (avatarFile) {
-        updates.avatar_url = await uploadImage(avatarFile, `${profile.id}/avatar`);
+        updates.avatar_url = await uploadImage(avatarFile);
       }
       if (bannerFile) {
-        updates.banner_url = await uploadImage(bannerFile, `${profile.id}/banner`);
+        updates.banner_url = await uploadImage(bannerFile);
       }
 
       const { error } = await supabase.from("profiles").update(updates).eq("id", profile.id);
