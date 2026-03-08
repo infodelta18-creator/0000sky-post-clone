@@ -63,26 +63,25 @@ export default function MobileDrawer({ open, onOpenChange }: MobileDrawerProps) 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[300px] p-0 flex flex-col">
-        <div className="px-5 pt-5 pb-4">
-          <Avatar className="h-14 w-14 mb-2">
-            <AvatarImage src={profile?.avatar_url || ""} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-lg">{profile?.display_name?.[0]?.toUpperCase() || "?"}</AvatarFallback>
-          </Avatar>
-          <p className="text-lg font-extrabold text-foreground truncate flex items-center gap-1">
-            {profile?.display_name || "User"}
-            {user && <VerifiedBadge userId={user.id} />}
-          </p>
-          <p className="text-sm text-muted-foreground truncate">@{profile?.username || "handle"}</p>
-          <p className="text-sm mt-1">
-            <span className="font-bold text-foreground">{followerCount}</span> <span className="text-muted-foreground">{t("profile.followers")}</span>
-            <span className="text-muted-foreground mx-1">·</span>
-            <span className="font-bold text-foreground">{followingCount}</span> <span className="text-muted-foreground">{t("profile.following_label")}</span>
-          </p>
-        </div>
-
-        <div className="border-t border-border" />
-
         <nav className="flex-1 overflow-y-auto py-1 px-2">
+          <div className="px-3 pt-4 pb-3">
+            <Avatar className="h-14 w-14 mb-2">
+              <AvatarImage src={profile?.avatar_url || ""} />
+              <AvatarFallback className="bg-primary text-primary-foreground text-lg">{profile?.display_name?.[0]?.toUpperCase() || "?"}</AvatarFallback>
+            </Avatar>
+            <p className="text-lg font-extrabold text-foreground truncate flex items-center gap-1">
+              {profile?.display_name || "User"}
+              {user && <VerifiedBadge userId={user.id} />}
+            </p>
+            <p className="text-sm text-muted-foreground truncate">@{profile?.username || "handle"}</p>
+            <p className="text-sm mt-1">
+              <span className="font-bold text-foreground">{followerCount}</span> <span className="text-muted-foreground">{t("profile.followers")}</span>
+              <span className="text-muted-foreground mx-1">·</span>
+              <span className="font-bold text-foreground">{followingCount}</span> <span className="text-muted-foreground">{t("profile.following_label")}</span>
+            </p>
+          </div>
+
+          <div className="border-t border-border mb-1" />
           {drawerNavItems.map(({ label, path, icon: Icon }) => {
             const profilePath = path === "/profile" ? `/profile/${profile?.username || ""}` : path;
             return (
