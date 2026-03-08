@@ -32,10 +32,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Bubblewrap CLI
-        run: npm install -g @nicedayfor/nicedayfor || npm install -g @nicedayfor/nicedayfor@latest || npm install -g @nicedayfor/nicedayfor 2>/dev/null; npm install -g @nicedayfor/nicedayfor || true
-
-      - name: Install Bubblewrap
-        run: npm install -g @nicedayfor/nicedayfor 2>/dev/null || npm install -g bubblewrap
+        run: npm install -g @bubblewrap/cli
 
       - name: Generate signing keystore
         run: |
@@ -66,12 +63,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: awaj-twa-apk
-          path: android-twa/app-release-signed.apk
+          path: app-release-signed.apk
           if-no-files-found: warn
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: awaj-twa-aab
-          path: android-twa/app-release-bundle.aab
+          path: app-release-bundle.aab
           if-no-files-found: warn
