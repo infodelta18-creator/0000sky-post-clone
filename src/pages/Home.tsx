@@ -13,6 +13,7 @@ import { Image as ImageIcon } from "lucide-react";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { useAllLiveUsers } from "@/hooks/use-live-status";
+import LiveViewerCount from "@/components/LiveViewerCount";
 
 type FeedTab = "discover" | "following" | "whats-hot";
 
@@ -222,6 +223,7 @@ export default function Home() {
                       <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 bg-destructive text-destructive-foreground text-[7px] font-bold px-1 rounded animate-pulse leading-none">LIVE</span>
                     </div>
                     <span className="text-[11px] font-medium text-foreground truncate max-w-[60px]">{p.display_name}</span>
+                    <LiveViewerCount liveStatusId={ls.id} isAudio={ls.stream_type === "audio"} className="text-[10px]" />
                   </button>
                 );
               })}
