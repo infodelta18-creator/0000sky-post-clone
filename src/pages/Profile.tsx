@@ -348,8 +348,8 @@ export default function Profile() {
 }
 
 /* ---- Profile "..." Menu ---- */
-function ProfileMoreMenu({ isOwner, onCopyLink, onSearchPosts, profileId }: {
-  isOwner: boolean; onCopyLink: () => void; onSearchPosts: () => void; profileId?: string;
+function ProfileMoreMenu({ isOwner, onCopyLink, onSearchPosts, onAddToLists, onGoLive, profileId }: {
+  isOwner: boolean; onCopyLink: () => void; onSearchPosts: () => void; onAddToLists: () => void; onGoLive?: () => void; profileId?: string;
 }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -397,7 +397,6 @@ function ProfileMoreMenu({ isOwner, onCopyLink, onSearchPosts, profileId }: {
       const { error } = await supabase.from("blocked_accounts").insert({ user_id: user.id, blocked_user_id: profileId });
       if (error?.code === "23505") { toast.info("Account already blocked"); return; }
       if (error) { toast.error("Failed to block account"); return; }
-      // Also unfollow when blocking
       await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", profileId);
       toast.success("Account blocked");
     }
@@ -433,11 +432,11 @@ function ProfileMoreMenu({ isOwner, onCopyLink, onSearchPosts, profileId }: {
         {isOwner && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex items-center justify-between py-3 px-4 cursor-pointer" onClick={() => toast.info("Lists coming soon")}>
+            <DropdownMenuItem className="flex items-center justify-between py-3 px-4 cursor-pointer" onClick={onAddToLists}>
               <span>Add to lists</span>
               <ListFilter className="h-5 w-5 text-muted-foreground" />
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex items-center justify-between py-3 px-4 cursor-pointer" onClick={() => toast.info("Go live coming soon")}>
+            <DropdownMenuItem className="flex items-center justify-between py-3 px-4 cursor-pointer" onClick={onGoLive}>
               <span>Go live</span>
               <Radio className="h-5 w-5 text-muted-foreground" />
             </DropdownMenuItem>
@@ -446,11 +445,7 @@ function ProfileMoreMenu({ isOwner, onCopyLink, onSearchPosts, profileId }: {
         {!isOwner && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex items-center justify-between py-3 px-4 cursor-pointer" onClick={() => toast.info("Starter packs coming soon")}>
-              <span>Add to starter packs</span>
-              <ListFilter className="h-5 w-5 text-muted-foreground" />
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex items-center justify-between py-3 px-4 cursor-pointer" onClick={() => toast.info("Lists coming soon")}>
+            <DropdownMenuItem className="flex items-center justify-between py-3 px-4 cursor-pointer" onClick={onAddToLists}>
               <span>Add to lists</span>
               <ListFilter className="h-5 w-5 text-muted-foreground" />
             </DropdownMenuItem>
