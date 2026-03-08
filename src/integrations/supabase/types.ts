@@ -1033,6 +1033,72 @@ export type Database = {
         }
         Relationships: []
       }
+      trending_topic_likes: {
+        Row: {
+          created_at: string
+          id: string
+          topic_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          topic_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          topic_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trending_topic_pins: {
+        Row: {
+          created_at: string
+          id: string
+          topic_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          topic_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          topic_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trending_topic_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          topic_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id: string
+          topic_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          topic_name?: string
+        }
+        Relationships: []
+      }
       user_feeds: {
         Row: {
           created_at: string
