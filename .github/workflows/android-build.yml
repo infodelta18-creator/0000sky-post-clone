@@ -15,9 +15,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Android SDK ও JDK-এর পাথ এনভায়রনমেন্ট ভেরিয়েবল হিসেবে সেট করা
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      # JAVA_HOME আগে থেকেই actions/setup-java সেট করে দেয়
 
     defaults:
       run:
@@ -47,7 +49,7 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      # ---------- টেম্পোরারি সাইনিং কী (প্লে স্টোর ছাড়া ব্যবহারের জন্য) ----------
+      # ---------- টেম্পোরারি সাইনিং কী (প্লে স্টোর ছাড়া) ----------
       - name: Generate temporary keystore
         run: |
           keytool -genkeypair \
@@ -61,27 +63,27 @@ jobs:
             -keysize 2048
           echo "✅ Temporary keystore created."
 
-      # ---------- পুরোনো বিল্ড ফাইল পরিষ্কার ----------
+      # ---------- শুধু আগের বিল্ড ফাইলগুলো মুছি (প্রজেক্ট ফাইল রাখি) ----------
       - name: Clean previous build files
         run: |
-          rm -rf ./app ./gradle ./build ./gradlew ./settings.gradle ./build.gradle ./local.properties 2>/dev/null || true
+          rm -rf ./app/build ./app/.gradle ./build ./.gradle ./gradle ./local.properties 2>/dev/null || true
           echo "🧹 Old build files removed."
 
-      # ---------- TWA প্রজেক্ট ইনিশিয়ালাইজ (JDK ও SDK পাথ সহ) ----------
+      # ---------- TWA প্রজেক্ট ইনিশিয়ালাইজ (সম্পূর্ণ non‑interactive) ----------
       - name: Initialize TWA project from manifest
         run: |
           bubblewrap init \
             --manifest="${{ env.MANIFEST_URL }}" \
-            --skipPwaValidation \
             --directory="." \
-            --jdkPath="$JAVA_HOME" \
-            --androidSdkPath="$ANDROID_HOME"
+            --skipPwaValidation \
+            --androidSdkPath="$ANDROID_HOME" \
+            --jdkPath="$JAVA_HOME"
           echo "✅ TWA project initialized."
 
       # ---------- বিল্ড (APK + AAB) ----------
       - name: Build TWA (APK + AAB)
         run: |
-          printf "n\n" | bubblewrap build \
+          bubblewrap build \
             --skipPwaValidation \
             --signingKeyPath=android.keystore \
             --signingKeyAlias=awaj \
