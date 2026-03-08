@@ -204,11 +204,15 @@
     height: -webkit-fill-available;
   }
 
-  /* Ensure all sticky page headers are slightly taller for comfortable touch targets */
+  /* Force all sticky page headers to exactly the same height */
   .sticky.top-0.border-b > .flex {
+    height: 48px;
     min-height: 48px;
+    max-height: 48px;
   }
   .sticky.top-0.border-b.flex {
+    height: 48px;
     min-height: 48px;
+    max-height: 48px;
   }
 }
