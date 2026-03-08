@@ -198,6 +198,7 @@ export default function Profile() {
           createdAt: post.created_at,
           images: postImages[post.id],
           videoUrl: (post as any).video_url || null,
+          embedUrl: (post as any).embed_url || null,
           likeCount: likeCounts[post.id] || 0, replyCount: replyCounts[post.id] || 0,
           repostCount: repostCounts[post.id] || 0,
           isLiked: userLikedSet.has(post.id), isReposted: userRepostedSet.has(post.id),
