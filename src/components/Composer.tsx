@@ -361,6 +361,14 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
               >
                 <Video className="h-5 w-5" strokeWidth={1.75} />
               </button>
+              <button
+                onClick={() => setEmbedInputOpen(!embedInputOpen)}
+                className={`rounded-full p-2 transition-colors ${hasVideo || hasEmbed ? "text-muted-foreground/40 cursor-not-allowed" : "text-primary hover:bg-primary/10"}`}
+                disabled={hasVideo || hasEmbed}
+                title="Embed video link"
+              >
+                <Link2 className="h-5 w-5" strokeWidth={1.75} />
+              </button>
               <button className="rounded-full p-2 text-primary transition-colors hover:bg-primary/10">
                 <span className="text-xs font-bold border-2 border-primary rounded px-1">GIF</span>
               </button>
