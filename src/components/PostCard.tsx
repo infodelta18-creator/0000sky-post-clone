@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageSquare, Repeat2, Forward, Bookmark, BookmarkCheck, Quote } from "lucide-react";
+import { Heart, MessageSquare, Repeat2, Forward, Bookmark, BookmarkCheck, Quote, Link2, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { timeAgo } from "@/lib/time";
 import { useNavigate } from "react-router-dom";
@@ -133,11 +133,16 @@ export default function PostCard({
     queryClient.invalidateQueries({ queryKey: ["bookmark", id] });
   };
 
-  const handleShare = (e: React.MouseEvent) => {
+  const handleCopyLink = (e: React.MouseEvent) => {
     e.stopPropagation();
     const postUrl = `${window.location.origin}/post/${id}`;
     navigator.clipboard.writeText(postUrl);
     toast.success("Link copied!");
+  };
+
+  const handleSendDM = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/messages?share=${id}`);
   };
 
   if (hidden) return null;
@@ -249,12 +254,29 @@ export default function PostCard({
               onClick={handleBookmark}
               fill={bookmarked || isBookmarked}
             />
-            <button
-              className="group flex items-center gap-1 rounded-full p-1.5 text-muted-foreground transition-colors hover:text-primary"
-              onClick={handleShare}
-            >
-              <Forward className="h-[18px] w-[18px]" strokeWidth={1.75} style={{ filter: 'drop-shadow(0.4px 0px 0px currentColor)' }} />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <button className="group flex items-center gap-1 rounded-full p-1.5 text-muted-foreground transition-colors hover:text-primary">
+                  <Forward className="h-[18px] w-[18px]" strokeWidth={1.75} style={{ filter: 'drop-shadow(0.4px 0px 0px currentColor)' }} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 z-50 bg-background border border-border shadow-lg">
+                <DropdownMenuItem
+                  onClick={(e) => { e.stopPropagation(); handleCopyLink(e as any); }}
+                  className="cursor-pointer py-2.5 px-3 text-sm gap-2"
+                >
+                  <Link2 className="h-4 w-4" />
+                  Copy link to post
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => { e.stopPropagation(); handleSendDM(e as any); }}
+                  className="cursor-pointer py-2.5 px-3 text-sm gap-2"
+                >
+                  <Send className="h-4 w-4" />
+                  Send via direct message
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <PostCardMenu
               postId={id}
               authorId={authorId}
