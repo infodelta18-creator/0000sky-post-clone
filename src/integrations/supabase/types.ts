@@ -593,6 +593,7 @@ export type Database = {
           is_live: boolean
           live_link: string
           started_at: string
+          stream_type: string
           updated_at: string
           user_id: string
         }
@@ -601,6 +602,7 @@ export type Database = {
           is_live?: boolean
           live_link?: string
           started_at?: string
+          stream_type?: string
           updated_at?: string
           user_id: string
         }
@@ -609,6 +611,7 @@ export type Database = {
           is_live?: boolean
           live_link?: string
           started_at?: string
+          stream_type?: string
           updated_at?: string
           user_id?: string
         }

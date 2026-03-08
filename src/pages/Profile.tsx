@@ -5,11 +5,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import PostCard from "@/components/PostCard";
-import { ArrowLeft, MoreHorizontal, Camera, Link2, Search, ListFilter, Radio, BellPlus, Flag, VolumeX, Ban, X, Globe, Info, ExternalLink, Tv } from "lucide-react";
+import { ArrowLeft, MoreHorizontal, Camera, Link2, Search, ListFilter, Radio, BellPlus, Flag, VolumeX, Ban, X, Globe, Info, ExternalLink, Tv, Headphones, Mic } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import FollowListDialog from "@/components/FollowListDialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -328,13 +328,13 @@ export default function Profile() {
           className="mx-4 mb-3 flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3.5 text-left transition-colors hover:bg-destructive/10"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive text-destructive-foreground">
-            <Tv className="h-5 w-5" />
+            {profileLiveStatus.stream_type === "audio" ? <Headphones className="h-5 w-5" /> : <Tv className="h-5 w-5" />}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground animate-pulse">● LIVE</span>
               <p className="text-sm font-semibold text-foreground truncate">
-                {detectPlatform(profileLiveStatus.live_link)?.name || "Live Stream"}
+                {profileLiveStatus.stream_type === "audio" ? "Audio Podcast" : (detectPlatform(profileLiveStatus.live_link)?.name || "Live Stream")}
               </p>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">{profileLiveStatus.live_link}</p>
@@ -619,16 +619,23 @@ function ProfileListsDialog({ open, onOpenChange, targetUserId, targetDisplayNam
 
 /* ---- Go Live Dialog ---- */
 const SUPPORTED_PLATFORMS = [
-  { name: "YouTube", domain: ["youtube.com", "youtu.be"], color: "bg-red-600" },
-  { name: "Facebook", domain: ["facebook.com", "fb.watch"], color: "bg-blue-600" },
-  { name: "Twitch", domain: ["twitch.tv"], color: "bg-purple-600" },
-  { name: "VDO.Ninja", domain: ["vdo.ninja"], color: "bg-emerald-600" },
-  { name: "Kick", domain: ["kick.com"], color: "bg-green-500" },
-  { name: "Instagram", domain: ["instagram.com"], color: "bg-pink-600" },
-  { name: "TikTok", domain: ["tiktok.com"], color: "bg-foreground" },
-  { name: "Rumble", domain: ["rumble.com"], color: "bg-green-700" },
-  { name: "Streamyard", domain: ["streamyard.com"], color: "bg-blue-500" },
-  { name: "Restream", domain: ["restream.io"], color: "bg-indigo-600" },
+  // Video platforms
+  { name: "YouTube", domain: ["youtube.com", "youtu.be"], color: "bg-red-600", type: "video" as const },
+  { name: "Facebook", domain: ["facebook.com", "fb.watch"], color: "bg-blue-600", type: "video" as const },
+  { name: "Twitch", domain: ["twitch.tv"], color: "bg-purple-600", type: "video" as const },
+  { name: "VDO.Ninja", domain: ["vdo.ninja"], color: "bg-emerald-600", type: "video" as const },
+  { name: "Kick", domain: ["kick.com"], color: "bg-green-500", type: "video" as const },
+  { name: "Instagram", domain: ["instagram.com"], color: "bg-pink-600", type: "video" as const },
+  { name: "TikTok", domain: ["tiktok.com"], color: "bg-foreground", type: "video" as const },
+  { name: "Rumble", domain: ["rumble.com"], color: "bg-green-700", type: "video" as const },
+  { name: "Streamyard", domain: ["streamyard.com"], color: "bg-blue-500", type: "video" as const },
+  { name: "Restream", domain: ["restream.io"], color: "bg-indigo-600", type: "video" as const },
+  // Audio / Podcast platforms
+  { name: "Spotify", domain: ["spotify.com", "open.spotify.com"], color: "bg-green-500", type: "audio" as const },
+  { name: "Apple Podcasts", domain: ["podcasts.apple.com"], color: "bg-purple-500", type: "audio" as const },
+  { name: "SoundCloud", domain: ["soundcloud.com"], color: "bg-orange-500", type: "audio" as const },
+  { name: "Twitter/X Spaces", domain: ["twitter.com/i/spaces", "x.com/i/spaces"], color: "bg-foreground", type: "audio" as const },
+  { name: "Clubhouse", domain: ["clubhouse.com"], color: "bg-yellow-500", type: "audio" as const },
 ];
 
 function detectPlatform(url: string) {
@@ -641,6 +648,7 @@ function GoLiveDialog({ open, onOpenChange, profile }: {
 }) {
   const { user } = useAuth();
   const [liveLink, setLiveLink] = useState("");
+  const [streamType, setStreamType] = useState<"video" | "audio">("video");
   const [saving, setSaving] = useState(false);
 
   const { data: liveStatus } = useQuery({
@@ -657,16 +665,24 @@ function GoLiveDialog({ open, onOpenChange, profile }: {
 
   const detectedPlatform = detectPlatform(liveLink);
 
+  // Auto-detect stream type from platform
+  useEffect(() => {
+    if (detectedPlatform) {
+      setStreamType(detectedPlatform.type);
+    }
+  }, [detectedPlatform]);
+
   const handleGoLive = async () => {
     if (!user || !liveLink.trim()) return;
     setSaving(true);
     const { data: existing } = await supabase.from("live_status").select("id").eq("user_id", user.id).maybeSingle();
     if (existing) {
-      await supabase.from("live_status").update({ live_link: liveLink, is_live: true, started_at: new Date().toISOString(), updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
+      await supabase.from("live_status").update({ live_link: liveLink, is_live: true, stream_type: streamType, started_at: new Date().toISOString(), updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
     } else {
-      await supabase.from("live_status").insert({ user_id: user.id, live_link: liveLink, is_live: true } as any);
+      await supabase.from("live_status").insert({ user_id: user.id, live_link: liveLink, is_live: true, stream_type: streamType } as any);
     }
     queryClient.invalidateQueries({ queryKey: ["liveStatus"] });
+    queryClient.invalidateQueries({ queryKey: ["allLiveStatuses"] });
     toast.success("You are now live!");
     setSaving(false);
     onOpenChange(false);
@@ -676,6 +692,7 @@ function GoLiveDialog({ open, onOpenChange, profile }: {
     if (!user) return;
     await supabase.from("live_status").update({ is_live: false, updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
     queryClient.invalidateQueries({ queryKey: ["liveStatus"] });
+    queryClient.invalidateQueries({ queryKey: ["allLiveStatuses"] });
     toast.success("Live stream ended");
     onOpenChange(false);
   };
@@ -715,12 +732,39 @@ function GoLiveDialog({ open, onOpenChange, profile }: {
           </div>
         </div>
 
+        {/* Stream type selector */}
         <div className="px-5 pb-3">
-          <label className="text-sm font-medium text-foreground">Live stream link</label>
+          <label className="text-sm font-medium text-foreground mb-2 block">Stream type</label>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setStreamType("video")}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors ${
+                streamType === "video" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-muted-foreground"
+              }`}
+            >
+              <Tv className="h-4 w-4" />
+              Video
+            </button>
+            <button
+              onClick={() => setStreamType("audio")}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors ${
+                streamType === "audio" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-muted-foreground"
+              }`}
+            >
+              <Headphones className="h-4 w-4" />
+              Audio / Podcast
+            </button>
+          </div>
+        </div>
+
+        <div className="px-5 pb-3">
+          <label className="text-sm font-medium text-foreground">
+            {streamType === "audio" ? "Audio / Podcast link" : "Live stream link"}
+          </label>
           <Input
             value={liveLink}
             onChange={(e) => setLiveLink(e.target.value)}
-            placeholder="https://youtube.com/live/... or any streaming URL"
+            placeholder={streamType === "audio" ? "https://open.spotify.com/... or podcast URL" : "https://youtube.com/live/... or any streaming URL"}
             className="mt-1.5"
           />
           {detectedPlatform && liveLink.trim() && (
@@ -730,14 +774,16 @@ function GoLiveDialog({ open, onOpenChange, profile }: {
             </div>
           )}
           {liveLink.trim() && !detectedPlatform && (
-            <p className="text-xs text-muted-foreground mt-2">Custom streaming link — viewers will be redirected to this URL.</p>
+            <p className="text-xs text-muted-foreground mt-2">Custom {streamType === "audio" ? "audio" : "streaming"} link — viewers will be redirected to this URL.</p>
           )}
         </div>
 
         <div className="px-5 pb-3">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Supported platforms</p>
+          <p className="text-xs font-medium text-muted-foreground mb-2">
+            {streamType === "audio" ? "Audio platforms" : "Video platforms"}
+          </p>
           <div className="flex flex-wrap gap-1.5">
-            {SUPPORTED_PLATFORMS.map(p => (
+            {SUPPORTED_PLATFORMS.filter(p => p.type === streamType).map(p => (
               <span key={p.name} className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-foreground">
                 <span className={`h-2 w-2 rounded-full ${p.color}`} />
                 {p.name}
@@ -750,7 +796,11 @@ function GoLiveDialog({ open, onOpenChange, profile }: {
         <div className="px-5 pb-3">
           <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 flex items-start gap-2.5">
             <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-muted-foreground">You can use any live streaming service — just paste the viewer link. Your followers will see a LIVE badge on your avatar.</p>
+            <p className="text-xs text-muted-foreground">
+              {streamType === "audio"
+                ? "Share your podcast or audio stream link. Listeners will see an audio visualizer with your profile and can tune in directly."
+                : "Paste any live streaming link. Your followers will see a LIVE badge on your avatar."}
+            </p>
           </div>
         </div>
 
@@ -808,6 +858,7 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
   open: boolean; onOpenChange: (v: boolean) => void; liveStatus: any; profile: any;
 }) {
   const link = liveStatus?.live_link || "";
+  const isAudio = liveStatus?.stream_type === "audio";
   const platform = detectPlatform(link);
   const embedUrl = getEmbedUrl(link);
   const fullLink = link.startsWith("http") ? link : `https://${link}`;
@@ -826,6 +877,7 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
               <p className="text-sm font-bold leading-tight">{profile.display_name}</p>
               <div className="flex items-center gap-1.5">
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold text-destructive animate-pulse">● LIVE</span>
+                {isAudio && <Headphones className="h-3 w-3 text-muted-foreground" />}
                 {platform && (
                   <>
                     <span className="text-muted-foreground text-[10px]">on</span>
@@ -843,8 +895,10 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
           </button>
         </div>
 
-        {/* Embed or fallback */}
-        {embedUrl ? (
+        {/* Content: Audio visualizer or Video embed */}
+        {isAudio ? (
+          <AudioPodcastVisual profile={profile} platform={platform} />
+        ) : embedUrl ? (
           <div className="aspect-video w-full bg-black">
             <iframe
               src={embedUrl}
@@ -861,7 +915,7 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
             </div>
             <h3 className="text-lg font-bold text-foreground mb-1">{profile.display_name} is live!</h3>
             <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-              This stream can't be embedded directly. Click the button below to watch on {platform?.name || "the streaming platform"}.
+              This stream can't be embedded directly. Click the button below to {isAudio ? "listen" : "watch"} on {platform?.name || "the streaming platform"}.
             </p>
           </div>
         )}
@@ -871,11 +925,77 @@ function LiveViewerDialog({ open, onOpenChange, liveStatus, profile }: {
           <p className="text-xs text-muted-foreground truncate flex-1 mr-3">{link}</p>
           <Button size="sm" className="rounded-full gap-1.5" onClick={() => window.open(fullLink, "_blank", "noopener,noreferrer")}>
             <ExternalLink className="h-3.5 w-3.5" />
-            Watch on {platform?.name || "site"}
+            {isAudio ? "Listen" : "Watch"} on {platform?.name || "site"}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ---- Audio Podcast Visualizer ---- */
+function AudioPodcastVisual({ profile, platform }: { profile: any; platform: any }) {
+  return (
+    <div className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-primary/10">
+      {/* Animated background circles */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-10 -left-10 h-40 w-40 rounded-full bg-primary/10 animate-pulse" style={{ animationDuration: "3s" }} />
+        <div className="absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-destructive/10 animate-pulse" style={{ animationDuration: "2.5s" }} />
+        <div className="absolute top-1/2 left-1/4 h-20 w-20 rounded-full bg-primary/5 animate-pulse" style={{ animationDuration: "4s" }} />
+      </div>
+
+      <div className="relative flex flex-col items-center py-12 px-6">
+        {/* Large avatar with audio ring */}
+        <div className="relative mb-6">
+          <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" style={{ animationDuration: "2s", scale: "1.15" }} />
+          <Avatar className="h-28 w-28 ring-4 ring-primary/30 ring-offset-4 ring-offset-background shadow-2xl">
+            <AvatarImage src={profile.avatar_url || ""} />
+            <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-bold">
+              {profile.display_name?.[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-destructive text-destructive-foreground px-2.5 py-1 rounded-full text-[10px] font-bold shadow-lg">
+            <Mic className="h-3 w-3" />
+            LIVE
+          </div>
+        </div>
+
+        {/* Audio waveform bars */}
+        <div className="flex items-end gap-[3px] h-10 mb-5">
+          {Array.from({ length: 24 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-[3px] rounded-full bg-primary/60"
+              style={{
+                height: `${12 + Math.sin(i * 0.7) * 16 + Math.random() * 8}px`,
+                animation: `pulse ${1.2 + (i % 5) * 0.3}s ease-in-out infinite alternate`,
+                animationDelay: `${i * 0.08}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Info */}
+        <h3 className="text-lg font-bold text-foreground mb-1">{profile.display_name}</h3>
+        <p className="text-sm text-muted-foreground mb-1">@{profile.username}</p>
+        {platform && (
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className={`h-2.5 w-2.5 rounded-full ${platform.color}`} />
+            <span className="text-xs font-medium text-muted-foreground">Streaming on {platform.name}</span>
+          </div>
+        )}
+
+        {/* Listening indicator */}
+        <div className="mt-5 flex items-center gap-2 rounded-full bg-muted/80 backdrop-blur-sm px-4 py-2">
+          <Headphones className="h-4 w-4 text-primary" />
+          <span className="text-xs font-medium text-foreground">Audio Podcast</span>
+          <span className="flex items-center gap-0.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+            <span className="text-[10px] font-bold text-destructive">LIVE</span>
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 

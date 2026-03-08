@@ -1,0 +1,1 @@
+ALTER TABLE public.live_status ADD COLUMN stream_type text NOT NULL DEFAULT 'video';
