@@ -14,6 +14,7 @@ import RichContent from "@/components/RichContent";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 import EmbedPlayer, { isEmbeddableUrl, getEmbedInfo } from "@/components/EmbedPlayer";
+import GifPicker from "@/components/GifPicker";
 
 interface QuotePostData {
   id: string; content: string; authorName: string; authorHandle: string;
@@ -51,9 +52,14 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
   const [embedInputOpen, setEmbedInputOpen] = useState(false);
   const [confirmedEmbedUrl, setConfirmedEmbedUrl] = useState<string | null>(null);
 
+  // GIF state
+  const [gifPickerOpen, setGifPickerOpen] = useState(false);
+  const [selectedGif, setSelectedGif] = useState<string | null>(null);
+
   const hasVideo = !!videoFile;
   const hasImages = images.length > 0;
   const hasEmbed = !!confirmedEmbedUrl;
+  const hasGif = !!selectedGif;
 
   // Set default interaction label
   useEffect(() => {
@@ -71,7 +77,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
     }
   }, [open, autoOpenImagePicker]);
 
-  const canPost = (content.trim().length > 0 || images.length > 0 || hasVideo || hasEmbed) && !overLimit && !videoProcessing;
+  const canPost = (content.trim().length > 0 || images.length > 0 || hasVideo || hasEmbed || hasGif) && !overLimit && !videoProcessing;
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
