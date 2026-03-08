@@ -5,7 +5,7 @@ import {
   Lock, Sun, Moon, Monitor, Type, Mail, PenLine,
   AtSign, Cake, Download, XCircle, Trash2, CheckCircle2,
   VolumeX, UserX, Shield, Filter, Users, Ban, CheckCircle,
-  Book, Wrench, Hash, MessageSquare
+  Book, Wrench, Hash, MessageSquare, Eye, EyeOff, AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
