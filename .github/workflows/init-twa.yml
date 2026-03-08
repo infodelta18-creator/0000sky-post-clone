@@ -32,17 +32,15 @@ jobs:
         run: |
           mkdir -p android-twa
           cd android-twa
-          bubblewrap init \
+          printf "n\n$JAVA_HOME\n$ANDROID_HOME\n" | bubblewrap init \
             --manifest=https://sky-post-clone.lovable.app/manifest.json \
             --directory=. \
-            --skipPwaValidation \
-            --jdkPath=$JAVA_HOME \
-            --androidSdkPath=$ANDROID_HOME
+            --skipPwaValidation
 
       - name: Commit generated project
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git add android-twa/
-          git commit -m "Generate TWA project [skip ci]"
+          git commit -m "Generate TWA project [skip ci]" || echo "No changes"
           git push
