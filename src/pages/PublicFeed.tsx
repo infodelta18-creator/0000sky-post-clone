@@ -13,8 +13,8 @@ type FeedTab = "discover" | "feeds";
 
 export default function PublicFeed() {
   const [tab, setTab] = useState<FeedTab>("discover");
-  const [showTopics, setShowTopics] = useState(true);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,37 +22,6 @@ export default function PublicFeed() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const { data: trendingTopics = [] } = useQuery({
-    queryKey: ["public_trending_topics"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("posts")
-        .select("content")
-        .is("parent_id", null)
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (!data) return [];
-      const wordMap: Record<string, number> = {};
-      data.forEach((p) => {
-        const hashtags = p.content.match(/#(\w+)/g);
-        if (hashtags) {
-          hashtags.forEach((tag: string) => {
-            const clean = tag.replace("#", "");
-            wordMap[clean] = (wordMap[clean] || 0) + 1;
-          });
-        }
-      });
-      if (Object.keys(wordMap).length === 0) {
-        return ["Technology", "Sports", "Politics", "Entertainment", "Science", "Gaming", "Music", "Art"];
-      }
-      return Object.entries(wordMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 8)
-        .map(([word]) => word);
-    },
-    staleTime: 300000,
-  });
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["public_posts", tab],
