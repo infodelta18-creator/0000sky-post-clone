@@ -390,7 +390,11 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
               >
                 <Link2 className="h-5 w-5" strokeWidth={1.75} />
               </button>
-              <button className="rounded-full p-2 text-primary transition-colors hover:bg-primary/10">
+              <button
+                onClick={() => setGifPickerOpen(true)}
+                className={`rounded-full p-2 transition-colors ${hasVideo || hasImages || hasGif ? "text-muted-foreground/40 cursor-not-allowed" : "text-primary hover:bg-primary/10"}`}
+                disabled={hasVideo || hasImages || hasGif}
+              >
                 <span className="text-xs font-bold border-2 border-primary rounded px-1">GIF</span>
               </button>
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/avif,image/bmp,image/tiff" multiple className="hidden" onChange={handleImageSelect} />
