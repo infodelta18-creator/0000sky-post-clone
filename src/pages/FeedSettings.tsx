@@ -147,7 +147,7 @@ export default function FeedSettings() {
   });
 
   const renderBack = (title: string, onBack: () => void, extra?: React.ReactNode) => (
-    <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm">
+    <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/95 px-4 py-1.5 backdrop-blur-sm">
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1 rounded-full hover:bg-accent"><ArrowLeft className="h-5 w-5" /></button>
         <h2 className="text-lg font-bold">{title}</h2>
