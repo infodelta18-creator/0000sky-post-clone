@@ -139,7 +139,7 @@ export async function processVideo(
 
   onProgress?.("Done!", 1);
 
-  const blob = new Blob([outputData], { type: "video/mp4" });
+  const blob = new Blob([outputData.buffer as ArrayBuffer], { type: "video/mp4" });
   const outputFile = new File([blob], "video.mp4", { type: "video/mp4" });
 
   return { file: outputFile, duration };
