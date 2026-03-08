@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Search, MessageCircle, Bell } from "lucide-react";
+import { Home, Search, MessageCircleMore, Bell } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +9,7 @@ import { useEffect } from "react";
 const mobileNavItems = [
   { label: "Home", path: "/", icon: Home },
   { label: "Search", path: "/search", icon: Search },
-  { label: "Chat", path: "/messages", icon: MessageCircle },
+  { label: "Chat", path: "/messages", icon: MessageCircleMore },
   { label: "Notifications", path: "/notifications", icon: Bell },
 ];
 
