@@ -153,7 +153,7 @@ export default function Profile() {
       if (!profile) return [];
       let query = supabase
         .from("posts")
-        .select(`id, content, created_at, parent_id, author_id, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
+        .select(`id, content, created_at, parent_id, author_id, video_url, profiles!posts_author_id_fkey (id, username, display_name, avatar_url)`)
         .eq("author_id", profile.id)
         .order("created_at", { ascending: false })
         .limit(50);
@@ -197,6 +197,7 @@ export default function Profile() {
           authorAvatar: p?.avatar_url || "", content: post.content,
           createdAt: post.created_at,
           images: postImages[post.id],
+          videoUrl: (post as any).video_url || null,
           likeCount: likeCounts[post.id] || 0, replyCount: replyCounts[post.id] || 0,
           repostCount: repostCounts[post.id] || 0,
           isLiked: userLikedSet.has(post.id), isReposted: userRepostedSet.has(post.id),
