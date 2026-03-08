@@ -144,7 +144,7 @@ export default function PostDetail() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm">
+      <div className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background/95 px-4 py-1.5 backdrop-blur-sm">
         <button onClick={() => navigate(-1)} className="rounded-full p-1.5 transition-colors bsky-hover">
           <ArrowLeft className="h-5 w-5" />
         </button>
