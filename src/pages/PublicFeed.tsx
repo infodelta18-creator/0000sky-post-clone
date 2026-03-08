@@ -141,7 +141,7 @@ export default function PublicFeed() {
         <div className="mx-auto flex max-w-feed items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-2">
             <AwajLogo className="h-7 w-7" />
-            <span className="text-lg font-bold text-foreground hidden sm:inline">Awaj</span>
+            <span className="text-lg font-bold text-foreground">Awaj</span>
           </div>
           <div className="flex items-center gap-2">
             <button
