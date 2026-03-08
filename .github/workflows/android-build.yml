@@ -75,16 +75,16 @@ jobs:
           rm -rf ./app ./gradle ./build ./gradlew ./settings.gradle ./build.gradle ./local.properties 2>/dev/null || true
           echo "🧹 Old build files removed."
 
-      # ---------- INITIALIZE TWA PROJECT ----------
+      # ---------- INITIALIZE TWA PROJECT (NON-INTERACTIVE) ----------
       - name: Initialize TWA project from manifest
         run: |
-          bubblewrap init \
+          printf "n\n" | bubblewrap init \
             --manifest="${{ env.MANIFEST_URL }}" \
             --skipPwaValidation \
             --directory="."
           echo "✅ TWA project initialized."
 
-      # ---------- BUILD (WITH NON-INTERACTIVE FALLBACK) ----------
+      # ---------- BUILD (NON-INTERACTIVE) ----------
       - name: Build TWA (APK + AAB)
         run: |
           printf "n\n" | bubblewrap build \
