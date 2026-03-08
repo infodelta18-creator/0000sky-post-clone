@@ -224,14 +224,6 @@ export default function VideoPlayer({ url, className = "", muted = true, loop = 
         </div>
       </div>
 
-      {/* Big center play button when paused */}
-      {!playing && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
-            <Play className="h-7 w-7 text-white ml-1" fill="white" />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
