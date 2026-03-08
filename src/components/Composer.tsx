@@ -124,6 +124,29 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
     setVideoPreview(null);
   };
 
+  const handleAddEmbed = () => {
+    const trimmed = embedUrl.trim();
+    if (!trimmed) return;
+    try {
+      new URL(trimmed); // validate URL
+    } catch {
+      toast.error("Please enter a valid URL");
+      return;
+    }
+    const info = getEmbedInfo(trimmed);
+    if (!info) {
+      toast.error("This URL is not supported for embedding. Try YouTube, Facebook, Twitch, Vimeo, VDO.Ninja, Kick, Rumble, Dailymotion, or Streamable.");
+      return;
+    }
+    setConfirmedEmbedUrl(trimmed);
+    setEmbedInputOpen(false);
+    setEmbedUrl("");
+  };
+
+  const removeEmbed = () => {
+    setConfirmedEmbedUrl(null);
+  };
+
   const uploadImage = async (file: File, postId: string, position: number) => {
     const path = `${user!.id}/${postId}/${position}.webp`;
     const { error } = await supabase.storage.from("profiles").upload(path, file, { contentType: "image/webp" });
@@ -157,6 +180,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
         author_id: user.id, content: content.trim(), parent_id: parentId || null, quote_post_id: quotePost?.id || null,
       };
       if (videoUrl) insertData.video_url = videoUrl;
+      if (confirmedEmbedUrl) insertData.embed_url = confirmedEmbedUrl;
 
       const { data: post, error } = await supabase.from("posts").insert(insertData).select("id").single();
       if (error || !post) { toast.error(t("composer.failed_post")); return; }
@@ -190,7 +214,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
       }
       images.forEach((img) => URL.revokeObjectURL(img.preview));
       if (videoPreview) URL.revokeObjectURL(videoPreview);
-      setContent(""); setImages([]); setVideoFile(null); setVideoPreview(null);
+      setContent(""); setImages([]); setVideoFile(null); setVideoPreview(null); setConfirmedEmbedUrl(null); setEmbedUrl(""); setEmbedInputOpen(false);
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["profilePosts"] });
       onOpenChange(false);
@@ -202,7 +226,7 @@ export default function Composer({ open, onOpenChange, parentId, autoOpenImagePi
     if (videoProcessing) return; // Don't close while processing
     images.forEach((img) => URL.revokeObjectURL(img.preview));
     if (videoPreview) URL.revokeObjectURL(videoPreview);
-    setContent(""); setImages([]); setVideoFile(null); setVideoPreview(null); onOpenChange(false);
+    setContent(""); setImages([]); setVideoFile(null); setVideoPreview(null); setConfirmedEmbedUrl(null); setEmbedUrl(""); setEmbedInputOpen(false); onOpenChange(false);
   };
 
   const ringRadius = 10;
