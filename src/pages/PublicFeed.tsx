@@ -113,7 +113,7 @@ export default function PublicFeed() {
         <MobileTopBarPublic onMenuClick={() => setDrawerOpen(true)} hidden={headerHidden} />
 
         {/* Desktop header - logo centered */}
-        <div className={`hidden lg:flex items-center justify-center border-b border-border py-3 sticky top-0 z-30 bg-background/95 backdrop-blur-sm transition-transform duration-300 ${headerHidden ? "-translate-y-full" : "translate-y-0"}`}>
+        <div className={`hidden lg:flex items-center justify-center border-b border-border py-1.5 sticky top-0 z-30 bg-background/95 backdrop-blur-sm transition-transform duration-300 ${headerHidden ? "-translate-y-full" : "translate-y-0"}`}>
           <AwajLogo className="h-8 w-8" />
         </div>
 
