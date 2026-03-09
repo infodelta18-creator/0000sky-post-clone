@@ -15,7 +15,7 @@ export default function TrendingTopicPage() {
   const [infoOpen, setInfoOpen] = useState(false);
 
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["trending_topic_posts", topic],
+    queryKey: ["trending_topic_posts", topic, user?.id],
     queryFn: async () => {
       const { data } = await supabase
         .from("posts")

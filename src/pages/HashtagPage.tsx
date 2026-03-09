@@ -22,7 +22,7 @@ export default function HashtagPage() {
   });
 
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["hashtag_posts", tag],
+    queryKey: ["hashtag_posts", tag, user?.id],
     queryFn: async () => {
       const { data } = await supabase.from("posts").select("id, content, created_at, parent_id, author_id, video_url, embed_url, profiles!posts_author_id_fkey(id, username, display_name, avatar_url)").ilike("content", `%#${tag}%`).is("parent_id", null).order("created_at", { ascending: false }).limit(50);
       if (!data || data.length === 0) return [];

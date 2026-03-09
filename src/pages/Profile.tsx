@@ -179,7 +179,7 @@ export default function Profile() {
   };
 
   const { data: posts = [] } = useQuery({
-    queryKey: ["profilePosts", profile?.id, activeTab],
+    queryKey: ["profilePosts", profile?.id, activeTab, user?.id],
     queryFn: async () => {
       if (!profile) return [];
       let query = supabase
