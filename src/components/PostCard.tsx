@@ -91,33 +91,34 @@ export default function PostCard({
     if (!user) return;
     const prevLiked = liked;
     const newLiked = !prevLiked;
+    setPendingLike(true);
     setLiked(newLiked);
     setLikes((l) => l + (newLiked ? 1 : -1));
     if (newLiked) setAnimating(true);
 
-    if (newLiked) {
-      const { error } = await supabase.from("likes").insert({ user_id: user.id, post_id: id });
-      if (error) {
-        if (error.code === "23505") {
-          // Already liked in DB — keep UI as liked, don't revert
+    try {
+      if (newLiked) {
+        const { error } = await supabase.from("likes").insert({ user_id: user.id, post_id: id });
+        if (error && error.code !== "23505") {
+          setLiked(prevLiked);
+          setLikes((l) => l - 1);
           return;
         }
-        // Real error — revert
-        setLiked(prevLiked);
-        setLikes((l) => l - 1);
-        return;
+        if (authorId !== user.id) {
+          await supabase.from("notifications").insert({
+            user_id: authorId, actor_id: user.id, type: "like", post_id: id,
+          });
+        }
+      } else {
+        const { error } = await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", id);
+        if (error) {
+          setLiked(prevLiked);
+          setLikes((l) => l + 1);
+        }
       }
-      if (authorId !== user.id) {
-        await supabase.from("notifications").insert({
-          user_id: authorId, actor_id: user.id, type: "like", post_id: id,
-        });
-      }
-    } else {
-      const { error } = await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", id);
-      if (error) {
-        setLiked(prevLiked);
-        setLikes((l) => l + 1);
-      }
+    } finally {
+      setPendingLike(false);
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
   };
 
