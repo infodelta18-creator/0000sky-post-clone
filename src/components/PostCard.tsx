@@ -89,20 +89,35 @@ export default function PostCard({
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) return;
-    const newLiked = !liked;
+    const prevLiked = liked;
+    const newLiked = !prevLiked;
     setLiked(newLiked);
     setLikes((l) => l + (newLiked ? 1 : -1));
     if (newLiked) setAnimating(true);
 
     if (newLiked) {
-      await supabase.from("likes").insert({ user_id: user.id, post_id: id });
+      const { error } = await supabase.from("likes").insert({ user_id: user.id, post_id: id });
+      if (error) {
+        if (error.code === "23505") {
+          // Already liked in DB — keep UI as liked, don't revert
+          return;
+        }
+        // Real error — revert
+        setLiked(prevLiked);
+        setLikes((l) => l - 1);
+        return;
+      }
       if (authorId !== user.id) {
         await supabase.from("notifications").insert({
           user_id: authorId, actor_id: user.id, type: "like", post_id: id,
         });
       }
     } else {
-      await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", id);
+      const { error } = await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", id);
+      if (error) {
+        setLiked(prevLiked);
+        setLikes((l) => l + 1);
+      }
     }
   };
 
