@@ -222,6 +222,7 @@ const bn: Record<string, string> = {
   "auth.username": "ব্যবহারকারী নাম (যেমন awaj_user)",
   "auth.display_name": "প্রদর্শন নাম",
   "auth.email": "ইমেইল ঠিকানা",
+  "auth.email_or_username": "ইমেইল অথবা ব্যবহারকারী নাম",
   "auth.password": "পাসওয়ার্ড",
   "auth.forgot_password": "পাসওয়ার্ড ভুলে গেছেন?",
   "auth.sign_in": "সাইন ইন",
