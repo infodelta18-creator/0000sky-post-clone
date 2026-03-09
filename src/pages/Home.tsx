@@ -83,7 +83,7 @@ export default function Home() {
   });
 
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["posts", tab],
+    queryKey: ["posts", tab, user?.id],
     queryFn: async () => {
       let query = supabase
         .from("posts")
