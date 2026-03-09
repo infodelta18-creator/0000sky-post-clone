@@ -183,7 +183,7 @@ export default function PostDetail() {
   const handleLike = async () => {
     if (!user || !postId) return;
     const newLiked = !isLiked;
-    setLiked(newLiked);
+    setLikedOverride(newLiked);
     if (newLiked) {
       await supabase.from("likes").insert({ user_id: user.id, post_id: postId });
       if (post?.author_id && post.author_id !== user.id) {
@@ -193,13 +193,14 @@ export default function PostDetail() {
       await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", postId);
     }
     queryClient.invalidateQueries({ queryKey: ["postStats", postId] });
-    queryClient.invalidateQueries({ queryKey: ["userLiked", postId] });
+    await queryClient.invalidateQueries({ queryKey: ["userLiked", postId] });
+    setLikedOverride(null);
   };
 
   const handleRepost = async () => {
     if (!user || !postId) return;
     const newReposted = !isReposted;
-    setReposted(newReposted);
+    setRepostedOverride(newReposted);
     if (newReposted) {
       await supabase.from("reposts").insert({ user_id: user.id, post_id: postId });
       if (post?.author_id && post.author_id !== user.id) {
@@ -209,23 +210,25 @@ export default function PostDetail() {
       await supabase.from("reposts").delete().eq("user_id", user.id).eq("post_id", postId);
     }
     queryClient.invalidateQueries({ queryKey: ["postStats", postId] });
-    queryClient.invalidateQueries({ queryKey: ["userReposted", postId] });
+    await queryClient.invalidateQueries({ queryKey: ["userReposted", postId] });
+    setRepostedOverride(null);
   };
 
   const handleBookmark = async () => {
     if (!user || !postId) return;
     const newBookmarked = !isBookmarked;
-    setBookmarked(newBookmarked);
+    setBookmarkedOverride(newBookmarked);
     if (newBookmarked) {
       const { error } = await supabase.from("bookmarks").insert({ user_id: user.id, post_id: postId });
       if (error?.code === "23505") { toast.info("Already bookmarked"); return; }
-      if (error) { toast.error("Failed to bookmark"); setBookmarked(false); return; }
+      if (error) { toast.error("Failed to bookmark"); setBookmarkedOverride(null); return; }
       toast.success("Post saved");
     } else {
       await supabase.from("bookmarks").delete().eq("user_id", user.id).eq("post_id", postId);
       toast.success("Bookmark removed");
     }
-    queryClient.invalidateQueries({ queryKey: ["bookmark", postId] });
+    await queryClient.invalidateQueries({ queryKey: ["bookmark", postId] });
+    setBookmarkedOverride(null);
   };
 
   const handleCopyLink = () => {
