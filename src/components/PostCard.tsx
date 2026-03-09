@@ -150,7 +150,6 @@ export default function PostCard({
       }
     }
   };
-  };
 
   const handleBookmark = async (e: React.MouseEvent) => {
     e.stopPropagation();
