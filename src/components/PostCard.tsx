@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Heart, MessageSquare, Repeat2, Forward, Bookmark, BookmarkCheck, Quote, Link2, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { timeAgo } from "@/lib/time";
@@ -54,12 +54,6 @@ export default function PostCard({
   const [likes, setLikes] = useState(likeCount);
   const [reposted, setReposted] = useState(isReposted);
   const [reposts, setReposts] = useState(repostCount);
-  const [pendingLike, setPendingLike] = useState(false);
-  const [pendingRepost, setPendingRepost] = useState(false);
-
-  // Keep local state in sync with query data, but only when no pending mutation
-  useEffect(() => { if (!pendingLike) { setLiked(isLiked); setLikes(likeCount); } }, [isLiked, likeCount, pendingLike]);
-  useEffect(() => { if (!pendingRepost) { setReposted(isReposted); setReposts(repostCount); } }, [isReposted, repostCount, pendingRepost]);
   const [animating, setAnimating] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [quoteComposerOpen, setQuoteComposerOpen] = useState(false);
@@ -91,34 +85,28 @@ export default function PostCard({
     if (!user) return;
     const prevLiked = liked;
     const newLiked = !prevLiked;
-    setPendingLike(true);
     setLiked(newLiked);
     setLikes((l) => l + (newLiked ? 1 : -1));
     if (newLiked) setAnimating(true);
 
-    try {
-      if (newLiked) {
-        const { error } = await supabase.from("likes").insert({ user_id: user.id, post_id: id });
-        if (error && error.code !== "23505") {
-          setLiked(prevLiked);
-          setLikes((l) => l - 1);
-          return;
-        }
-        if (authorId !== user.id) {
-          await supabase.from("notifications").insert({
-            user_id: authorId, actor_id: user.id, type: "like", post_id: id,
-          });
-        }
-      } else {
-        const { error } = await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", id);
-        if (error) {
-          setLiked(prevLiked);
-          setLikes((l) => l + 1);
-        }
+    if (newLiked) {
+      const { error } = await supabase.from("likes").insert({ user_id: user.id, post_id: id });
+      if (error && error.code !== "23505") {
+        setLiked(prevLiked);
+        setLikes((l) => l - 1);
+        return;
       }
-    } finally {
-      setPendingLike(false);
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      if (authorId !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: authorId, actor_id: user.id, type: "like", post_id: id,
+        });
+      }
+    } else {
+      const { error } = await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", id);
+      if (error) {
+        setLiked(prevLiked);
+        setLikes((l) => l + 1);
+      }
     }
   };
 
@@ -127,33 +115,27 @@ export default function PostCard({
     if (!user) return;
     const prevReposted = reposted;
     const newReposted = !prevReposted;
-    setPendingRepost(true);
     setReposted(newReposted);
     setReposts((r) => r + (newReposted ? 1 : -1));
 
-    try {
-      if (newReposted) {
-        const { error } = await supabase.from("reposts").insert({ user_id: user.id, post_id: id });
-        if (error && error.code !== "23505") {
-          setReposted(prevReposted);
-          setReposts((r) => r - 1);
-          return;
-        }
-        if (authorId !== user.id) {
-          await supabase.from("notifications").insert({
-            user_id: authorId, actor_id: user.id, type: "repost", post_id: id,
-          });
-        }
-      } else {
-        const { error } = await supabase.from("reposts").delete().eq("user_id", user.id).eq("post_id", id);
-        if (error) {
-          setReposted(prevReposted);
-          setReposts((r) => r + 1);
-        }
+    if (newReposted) {
+      const { error } = await supabase.from("reposts").insert({ user_id: user.id, post_id: id });
+      if (error && error.code !== "23505") {
+        setReposted(prevReposted);
+        setReposts((r) => r - 1);
+        return;
       }
-    } finally {
-      setPendingRepost(false);
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      if (authorId !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: authorId, actor_id: user.id, type: "repost", post_id: id,
+        });
+      }
+    } else {
+      const { error } = await supabase.from("reposts").delete().eq("user_id", user.id).eq("post_id", id);
+      if (error) {
+        setReposted(prevReposted);
+        setReposts((r) => r + 1);
+      }
     }
   };
 
