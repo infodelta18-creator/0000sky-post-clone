@@ -79,7 +79,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (identifier: string, password: string) => {
+    let email = identifier;
+    if (!identifier.includes("@")) {
+      const { data, error: lookupError } = await supabase.rpc("get_email_by_username", { _username: identifier });
+      if (lookupError || !data) throw new Error("Username not found");
+      email = data as string;
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
   };
