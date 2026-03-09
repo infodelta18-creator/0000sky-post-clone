@@ -171,14 +171,14 @@ export default function PostDetail() {
     enabled: !!user && !!postId,
   });
 
-  const [liked, setLiked] = useState(false);
-  const [reposted, setReposted] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
+  const [likedOverride, setLikedOverride] = useState<boolean | null>(null);
+  const [repostedOverride, setRepostedOverride] = useState<boolean | null>(null);
+  const [bookmarkedOverride, setBookmarkedOverride] = useState<boolean | null>(null);
 
-  // Sync from queries
-  const isLiked = liked !== userLiked ? liked : userLiked;
-  const isReposted = reposted !== userReposted ? reposted : userReposted;
-  const isBookmarked = bookmarked !== userBookmarked ? bookmarked : userBookmarked;
+  // Use override during mutation, otherwise trust query data
+  const isLiked = likedOverride !== null ? likedOverride : userLiked;
+  const isReposted = repostedOverride !== null ? repostedOverride : userReposted;
+  const isBookmarked = bookmarkedOverride !== null ? bookmarkedOverride : userBookmarked;
 
   const handleLike = async () => {
     if (!user || !postId) return;
