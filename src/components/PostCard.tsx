@@ -127,28 +127,33 @@ export default function PostCard({
     if (!user) return;
     const prevReposted = reposted;
     const newReposted = !prevReposted;
+    setPendingRepost(true);
     setReposted(newReposted);
     setReposts((r) => r + (newReposted ? 1 : -1));
 
-    if (newReposted) {
-      const { error } = await supabase.from("reposts").insert({ user_id: user.id, post_id: id });
-      if (error) {
-        if (error.code === "23505") return; // already reposted
-        setReposted(prevReposted);
-        setReposts((r) => r - 1);
-        return;
+    try {
+      if (newReposted) {
+        const { error } = await supabase.from("reposts").insert({ user_id: user.id, post_id: id });
+        if (error && error.code !== "23505") {
+          setReposted(prevReposted);
+          setReposts((r) => r - 1);
+          return;
+        }
+        if (authorId !== user.id) {
+          await supabase.from("notifications").insert({
+            user_id: authorId, actor_id: user.id, type: "repost", post_id: id,
+          });
+        }
+      } else {
+        const { error } = await supabase.from("reposts").delete().eq("user_id", user.id).eq("post_id", id);
+        if (error) {
+          setReposted(prevReposted);
+          setReposts((r) => r + 1);
+        }
       }
-      if (authorId !== user.id) {
-        await supabase.from("notifications").insert({
-          user_id: authorId, actor_id: user.id, type: "repost", post_id: id,
-        });
-      }
-    } else {
-      const { error } = await supabase.from("reposts").delete().eq("user_id", user.id).eq("post_id", id);
-      if (error) {
-        setReposted(prevReposted);
-        setReposts((r) => r + 1);
-      }
+    } finally {
+      setPendingRepost(false);
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
   };
 
