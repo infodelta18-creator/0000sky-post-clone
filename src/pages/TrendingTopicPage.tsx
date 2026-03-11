@@ -87,6 +87,7 @@ export default function TrendingTopicPage() {
           likeCount: likeCounts[p.id] || 0, replyCount: replyCounts[p.id] || 0,
           repostCount: repostCounts[p.id] || 0,
           isLiked: userLikedSet.has(p.id), isReposted: userRepostedSet.has(p.id),
+          isReplied: userRepliedSet.has(p.id),
           quotePost: p.quote_post_id ? quotePostMap[p.quote_post_id] || null : null,
         };
       });
