@@ -27,13 +27,14 @@ export default function HashtagPage() {
       const { data } = await supabase.from("posts").select("id, content, created_at, parent_id, author_id, video_url, embed_url, profiles!posts_author_id_fkey(id, username, display_name, avatar_url)").ilike("content", `%#${tag}%`).is("parent_id", null).order("created_at", { ascending: false }).limit(50);
       if (!data || data.length === 0) return [];
       const postIds = data.map((p) => p.id);
-      const [likesRes, repostsRes, repliesRes, userLikesRes, userRepostsRes, imagesRes] = await Promise.all([
+      const [likesRes, repostsRes, repliesRes, userLikesRes, userRepostsRes, imagesRes, userRepliesRes] = await Promise.all([
         supabase.from("likes").select("post_id").in("post_id", postIds),
         supabase.from("reposts").select("post_id").in("post_id", postIds),
         supabase.from("posts").select("parent_id").in("parent_id", postIds),
         user ? supabase.from("likes").select("post_id").in("post_id", postIds).eq("user_id", user.id) : { data: [] },
         user ? supabase.from("reposts").select("post_id").in("post_id", postIds).eq("user_id", user.id) : { data: [] },
         supabase.from("post_images").select("post_id, url, position").in("post_id", postIds).order("position"),
+        user ? supabase.from("posts").select("parent_id").in("parent_id", postIds).eq("author_id", user.id) : { data: [] },
       ]);
       const likeCounts: Record<string, number> = {}; const repostCounts: Record<string, number> = {}; const replyCounts: Record<string, number> = {}; const postImages: Record<string, string[]> = {};
       const userLikedSet = new Set((userLikesRes.data || []).map((l: any) => l.post_id));
