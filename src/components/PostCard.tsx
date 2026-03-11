@@ -303,7 +303,7 @@ export default function PostCard({
           )}
 
           <div className="mt-2 flex items-center justify-between -ml-1.5">
-            <ActionButton icon={MessageSquare} count={replyCount} onClick={(e) => { e.stopPropagation(); setReplyComposerOpen(true); }} />
+            <ActionButton icon={MessageSquare} count={replyCount} active={isReplied} activeColor="text-[hsl(var(--bsky-reply))]" hoverColor="hover:text-[hsl(var(--bsky-reply))]" onClick={(e) => { e.stopPropagation(); setReplyComposerOpen(true); }} />
             
             {/* Repost dropdown with quote option */}
             <DropdownMenu open={repostMenuOpen} onOpenChange={setRepostMenuOpen}>
