@@ -37,7 +37,7 @@ export default function SavedPosts() {
       const orderMap = new Map(bookmarks.map((b, i) => [b.post_id, i]));
       return posts.sort((a, b) => (orderMap.get(a.id) || 0) - (orderMap.get(b.id) || 0)).map((p: any) => ({
         ...p, likeCount: lcMap[p.id] || 0, replyCount: rcMap[p.id] || 0, repostCount: rpMap[p.id] || 0,
-        isLiked: likedSet.has(p.id), isReposted: repostedSet.has(p.id),
+        isLiked: likedSet.has(p.id), isReposted: repostedSet.has(p.id), isReplied: repliedSet.has(p.id),
         images: p.post_images?.sort((a: any, b: any) => a.position - b.position).map((i: any) => i.url) || [],
       }));
     },
