@@ -23,8 +23,10 @@ export default function SavedPosts() {
       if (!posts) return [];
       const { data: likes } = await supabase.from("likes").select("post_id").eq("user_id", user.id).in("post_id", postIds);
       const { data: reposts } = await supabase.from("reposts").select("post_id").eq("user_id", user.id).in("post_id", postIds);
+      const { data: userReplies } = await supabase.from("posts").select("parent_id").in("parent_id", postIds).eq("author_id", user.id);
       const likedSet = new Set(likes?.map((l) => l.post_id) || []);
       const repostedSet = new Set(reposts?.map((r) => r.post_id) || []);
+      const repliedSet = new Set(userReplies?.map((r: any) => r.parent_id) || []);
       const { data: likeCounts } = await supabase.from("likes").select("post_id").in("post_id", postIds);
       const { data: replyCounts } = await supabase.from("posts").select("parent_id").in("parent_id", postIds);
       const { data: repostCounts } = await supabase.from("reposts").select("post_id").in("post_id", postIds);
