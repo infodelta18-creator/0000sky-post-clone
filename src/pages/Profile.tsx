@@ -196,13 +196,14 @@ export default function Profile() {
       if (!data || data.length === 0) return [];
 
       const postIds = data.map((p) => p.id);
-      const [likesRes, repostsRes, repliesRes, userLikesRes, userRepostsRes, imagesRes] = await Promise.all([
+      const [likesRes, repostsRes, repliesRes, userLikesRes, userRepostsRes, imagesRes, userRepliesRes] = await Promise.all([
         supabase.from("likes").select("post_id").in("post_id", postIds),
         supabase.from("reposts").select("post_id").in("post_id", postIds),
         supabase.from("posts").select("parent_id").in("parent_id", postIds),
         user ? supabase.from("likes").select("post_id").in("post_id", postIds).eq("user_id", user.id) : { data: [] },
         user ? supabase.from("reposts").select("post_id").in("post_id", postIds).eq("user_id", user.id) : { data: [] },
         supabase.from("post_images").select("post_id, url, position").in("post_id", postIds).order("position"),
+        user ? supabase.from("posts").select("parent_id").in("parent_id", postIds).eq("author_id", user.id) : { data: [] },
       ]);
 
       const likeCounts: Record<string, number> = {};
@@ -211,6 +212,7 @@ export default function Profile() {
       const postImages: Record<string, string[]> = {};
       const userLikedSet = new Set((userLikesRes.data || []).map((l) => l.post_id));
       const userRepostedSet = new Set((userRepostsRes.data || []).map((r) => r.post_id));
+      const userRepliedSet = new Set((userRepliesRes.data || []).map((r: any) => r.parent_id));
 
       (likesRes.data || []).forEach((l) => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
       (repostsRes.data || []).forEach((r) => { repostCounts[r.post_id] = (repostCounts[r.post_id] || 0) + 1; });
@@ -233,6 +235,7 @@ export default function Profile() {
           likeCount: likeCounts[post.id] || 0, replyCount: replyCounts[post.id] || 0,
           repostCount: repostCounts[post.id] || 0,
           isLiked: userLikedSet.has(post.id), isReposted: userRepostedSet.has(post.id),
+          isReplied: userRepliedSet.has(post.id),
         };
       });
     },
@@ -472,13 +475,14 @@ function ProfileSearchDialog({ open, onOpenChange, profileId, profileUsername }:
       if (!data || data.length === 0) return [];
 
       const postIds = data.map((p) => p.id);
-      const [likesRes, repostsRes, repliesRes, userLikesRes, userRepostsRes, imagesRes] = await Promise.all([
+      const [likesRes, repostsRes, repliesRes, userLikesRes, userRepostsRes, imagesRes, userRepliesRes] = await Promise.all([
         supabase.from("likes").select("post_id").in("post_id", postIds),
         supabase.from("reposts").select("post_id").in("post_id", postIds),
         supabase.from("posts").select("parent_id").in("parent_id", postIds),
         user ? supabase.from("likes").select("post_id").in("post_id", postIds).eq("user_id", user.id) : { data: [] },
         user ? supabase.from("reposts").select("post_id").in("post_id", postIds).eq("user_id", user.id) : { data: [] },
         supabase.from("post_images").select("post_id, url, position").in("post_id", postIds).order("position"),
+        user ? supabase.from("posts").select("parent_id").in("parent_id", postIds).eq("author_id", user.id) : { data: [] },
       ]);
 
       const likeCounts: Record<string, number> = {};
@@ -487,6 +491,7 @@ function ProfileSearchDialog({ open, onOpenChange, profileId, profileUsername }:
       const postImages: Record<string, string[]> = {};
       const userLikedSet = new Set((userLikesRes.data || []).map((l) => l.post_id));
       const userRepostedSet = new Set((userRepostsRes.data || []).map((r) => r.post_id));
+      const userRepliedSet = new Set((userRepliesRes.data || []).map((r: any) => r.parent_id));
       (likesRes.data || []).forEach((l) => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
       (repostsRes.data || []).forEach((r) => { repostCounts[r.post_id] = (repostCounts[r.post_id] || 0) + 1; });
       (repliesRes.data || []).forEach((r) => { if (r.parent_id) replyCounts[r.parent_id] = (replyCounts[r.parent_id] || 0) + 1; });
@@ -512,6 +517,7 @@ function ProfileSearchDialog({ open, onOpenChange, profileId, profileUsername }:
           likeCount: likeCounts[post.id] || 0, replyCount: replyCounts[post.id] || 0,
           repostCount: repostCounts[post.id] || 0,
           isLiked: userLikedSet.has(post.id), isReposted: userRepostedSet.has(post.id),
+          isReplied: userRepliedSet.has(post.id),
         };
       });
     },

@@ -34,6 +34,7 @@ interface PostCardProps {
   repostCount: number;
   isLiked: boolean;
   isReposted: boolean;
+  isReplied?: boolean;
   quotePost?: {
     id: string;
     content: string;
@@ -48,7 +49,7 @@ interface PostCardProps {
 export default function PostCard({
   id, authorId, authorName, authorHandle, authorAvatar,
   content, createdAt, images, videoUrl, embedUrl, likeCount, replyCount, repostCount,
-  isLiked, isReposted, quotePost,
+  isLiked, isReposted, isReplied, quotePost,
 }: PostCardProps) {
   const [liked, setLiked] = useState(isLiked);
   const [likes, setLikes] = useState(likeCount);
@@ -302,13 +303,13 @@ export default function PostCard({
           )}
 
           <div className="mt-2 flex items-center justify-between -ml-1.5">
-            <ActionButton icon={MessageSquare} count={replyCount} onClick={(e) => { e.stopPropagation(); setReplyComposerOpen(true); }} />
+            <ActionButton icon={MessageSquare} count={replyCount} active={isReplied} activeColor="text-[hsl(var(--bsky-reply))]" hoverColor="hover:text-[hsl(var(--bsky-reply))]" onClick={(e) => { e.stopPropagation(); setReplyComposerOpen(true); }} />
             
             {/* Repost dropdown with quote option */}
             <DropdownMenu open={repostMenuOpen} onOpenChange={setRepostMenuOpen}>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`group flex items-center gap-1 rounded-full p-1.5 text-muted-foreground transition-colors hover:text-[hsl(var(--bsky-repost))] ${reposted ? "text-[hsl(var(--bsky-repost))]" : ""}`}
+                  className={`group flex items-center gap-1 rounded-full p-1.5 transition-colors hover:text-[hsl(var(--bsky-repost))] ${reposted ? "text-[hsl(var(--bsky-repost))]" : "text-muted-foreground"}`}
                   onClick={(e) => { e.stopPropagation(); e.preventDefault(); setRepostMenuOpen(prev => !prev); }}
                   onPointerDown={(e) => e.preventDefault()}
                 >

@@ -128,13 +128,14 @@ export default function Home() {
       
       const quotePostIds = filtered.map((p) => (p as any).quote_post_id).filter(Boolean) as string[];
       
-      const [likesRes, repostsRes, repliesRes, userLikesRes, userRepostsRes, imagesRes, quotePostsRes, quoteImagesRes] = await Promise.all([
+      const [likesRes, repostsRes, repliesRes, userLikesRes, userRepostsRes, imagesRes, userRepliesRes, quotePostsRes, quoteImagesRes] = await Promise.all([
         supabase.from("likes").select("post_id").in("post_id", postIds),
         supabase.from("reposts").select("post_id").in("post_id", postIds),
         supabase.from("posts").select("parent_id").in("parent_id", postIds),
         user ? supabase.from("likes").select("post_id").in("post_id", postIds).eq("user_id", user.id) : { data: [] },
         user ? supabase.from("reposts").select("post_id").in("post_id", postIds).eq("user_id", user.id) : { data: [] },
         supabase.from("post_images").select("post_id, url, position").in("post_id", postIds).order("position"),
+        user ? supabase.from("posts").select("parent_id").in("parent_id", postIds).eq("author_id", user.id) : { data: [] },
         quotePostIds.length > 0
           ? supabase.from("posts").select("id, content, created_at, author_id, profiles!posts_author_id_fkey (username, display_name, avatar_url)").in("id", quotePostIds)
           : { data: [] },
@@ -149,6 +150,7 @@ export default function Home() {
       const postImages: Record<string, string[]> = {};
       const userLikedSet = new Set((userLikesRes.data || []).map((l) => l.post_id));
       const userRepostedSet = new Set((userRepostsRes.data || []).map((r) => r.post_id));
+      const userRepliedSet = new Set((userRepliesRes.data || []).map((r: any) => r.parent_id));
 
       (likesRes.data || []).forEach((l) => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
       (repostsRes.data || []).forEach((r) => { repostCounts[r.post_id] = (repostCounts[r.post_id] || 0) + 1; });
@@ -186,6 +188,7 @@ export default function Home() {
           likeCount: likeCounts[post.id] || 0, replyCount: replyCounts[post.id] || 0,
           repostCount: repostCounts[post.id] || 0,
           isLiked: userLikedSet.has(post.id), isReposted: userRepostedSet.has(post.id),
+          isReplied: userRepliedSet.has(post.id),
           quotePost: (post as any).quote_post_id ? quotePostMap[(post as any).quote_post_id] || null : null,
         };
       });
