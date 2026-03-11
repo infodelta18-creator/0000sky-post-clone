@@ -46,7 +46,7 @@ export default function HashtagPage() {
       (imagesRes.data || []).forEach((img: any) => { if (!postImages[img.post_id]) postImages[img.post_id] = []; postImages[img.post_id].push(img.url); });
       return data.map((p: any) => {
         const profile = p.profiles as any;
-        return { id: p.id, authorId: p.author_id, authorName: profile?.display_name || "", authorHandle: profile?.username || "", authorAvatar: profile?.avatar_url || "", content: p.content, createdAt: p.created_at, images: postImages[p.id], videoUrl: (p as any).video_url || null, embedUrl: (p as any).embed_url || null, likeCount: likeCounts[p.id] || 0, replyCount: replyCounts[p.id] || 0, repostCount: repostCounts[p.id] || 0, isLiked: userLikedSet.has(p.id), isReposted: userRepostedSet.has(p.id) };
+        return { id: p.id, authorId: p.author_id, authorName: profile?.display_name || "", authorHandle: profile?.username || "", authorAvatar: profile?.avatar_url || "", content: p.content, createdAt: p.created_at, images: postImages[p.id], videoUrl: (p as any).video_url || null, embedUrl: (p as any).embed_url || null, likeCount: likeCounts[p.id] || 0, replyCount: replyCounts[p.id] || 0, repostCount: repostCounts[p.id] || 0, isLiked: userLikedSet.has(p.id), isReposted: userRepostedSet.has(p.id), isReplied: userRepliedSet.has(p.id) };
       });
     },
     enabled: !!tag,
