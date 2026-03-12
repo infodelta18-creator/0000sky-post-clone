@@ -287,6 +287,11 @@ export default function PostCard({
             <RichContent content={content} />
           </p>
 
+          {/* Link preview - only show if no images/video/embed */}
+          {!images?.length && !videoUrl && !embedUrl && extractFirstUrl(content) && (
+            <LinkPreview url={extractFirstUrl(content)!} />
+          )}
+
           {images && images.length > 0 && <ImageGrid images={images} />}
 
           {videoUrl && <VideoPlayer url={videoUrl} />}
