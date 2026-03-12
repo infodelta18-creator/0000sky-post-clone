@@ -475,7 +475,7 @@ export default function Profile() {
       {posts.length === 0 ? (
         <p className="py-12 text-center text-muted-foreground">No {activeTab.toLowerCase()} yet</p>
       ) : (
-        posts.map((post) => <PostCard key={post.id} {...post} />)
+        posts.map((entry: any) => <PostCard key={entry.feedKey} {...entry.post} repostedBy={entry.repostedBy} />)
       )}
 
       {isOwnProfile && (
