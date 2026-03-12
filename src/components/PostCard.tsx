@@ -35,6 +35,7 @@ interface PostCardProps {
   isLiked: boolean;
   isReposted: boolean;
   isReplied?: boolean;
+  repostedBy?: { username: string; displayName: string } | null;
   quotePost?: {
     id: string;
     content: string;
