@@ -17,6 +17,13 @@ import LiveAvatar from "@/components/LiveAvatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Composer from "@/components/Composer";
 import SharePostDialog from "@/components/SharePostDialog";
+import LinkPreview from "@/components/LinkPreview";
+
+/** Extract the first URL from post content */
+function extractFirstUrl(text: string): string | null {
+  const match = text.match(/https?:\/\/[^\s]+/);
+  return match ? match[0] : null;
+}
 
 interface PostCardProps {
   id: string;
