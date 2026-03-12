@@ -396,7 +396,7 @@ export default function Home() {
           <p className="mt-1 text-sm">{t("home.be_first")}</p>
         </div>
       ) : (
-        posts.map((post) => <PostCard key={post.id} {...post} />)
+        posts.map((entry: any) => <PostCard key={entry.feedKey} {...entry.post} repostedBy={entry.repostedBy} />)
       )}
 
       <Composer open={composerOpen} onOpenChange={(v) => { setComposerOpen(v); if (!v) setComposerAutoImage(false); }} autoOpenImagePicker={composerAutoImage} />
