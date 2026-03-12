@@ -17,6 +17,13 @@ import LiveAvatar from "@/components/LiveAvatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Composer from "@/components/Composer";
 import SharePostDialog from "@/components/SharePostDialog";
+import LinkPreview from "@/components/LinkPreview";
+
+/** Extract the first URL from post content */
+function extractFirstUrl(text: string): string | null {
+  const match = text.match(/https?:\/\/[^\s]+/);
+  return match ? match[0] : null;
+}
 
 interface PostCardProps {
   id: string;
@@ -279,6 +286,11 @@ export default function PostCard({
           <p className="mt-0.5 whitespace-pre-wrap break-words text-[15px] leading-snug text-foreground">
             <RichContent content={content} />
           </p>
+
+          {/* Link preview - only show if no images/video/embed */}
+          {!images?.length && !videoUrl && !embedUrl && extractFirstUrl(content) && (
+            <LinkPreview url={extractFirstUrl(content)!} />
+          )}
 
           {images && images.length > 0 && <ImageGrid images={images} />}
 
