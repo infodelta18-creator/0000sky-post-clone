@@ -421,7 +421,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <h1 className="mt-2 text-[22px] font-extrabold leading-tight flex items-center gap-0.6">
+        <h1 className="mt-2 text-[22px] font-extrabold leading-tight flex items-center gap-0.75">
           {profile.display_name}
           <VerifiedBadge userId={profile.id} />
         </h1>
@@ -496,10 +496,11 @@ export default function Profile() {
         </ScrollArea>
       </div>
 
-      {/* Pinned post */}
+            {/* Pinned post */}
       {activeTab === "Posts" && pinnedPost && (
         <div>
-          <div className="flex items-center gap-1.5 px-4 pt-2 pb-0 text-muted-foreground">
+          {/* px-4 পরিবর্তন করে pr-4 এবং pl-[68px] করা হয়েছে */}
+          <div className="flex items-center gap-1.5 pr-4 pl-[68px] pt-2 pb-0 text-muted-foreground">
             <Pin className="h-3.5 w-3.5" />
             <span className="text-xs font-semibold">Pinned</span>
           </div>
