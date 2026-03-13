@@ -56,13 +56,16 @@ const BskyShare = (props: any) => (
 );
 
 const BskyFilter = (props: any) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <circle cx="9" cy="7" r="2" />
-    <path d="M9 2v3" />
-    <path d="M9 9v13" />
-    <circle cx="15" cy="17" r="2" />
-    <path d="M15 2v13" />
-    <path d="M15 19v3" />
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <line x1="4" y1="21" x2="4" y2="14" />
+    <line x1="4" y1="10" x2="4" y2="3" />
+    <line x1="12" y1="21" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12" y2="3" />
+    <line x1="20" y1="21" x2="20" y2="16" />
+    <line x1="20" y1="12" x2="20" y2="3" />
+    <line x1="2" y1="14" x2="6" y2="14" />
+    <line x1="10" y1="8" x2="14" y2="8" />
+    <line x1="18" y1="16" x2="22" y2="16" />
   </svg>
 );
 
@@ -447,7 +450,7 @@ export default function PostDetail() {
             <button
               onClick={handleFollow}
               disabled={isFollowLoading}
-              className={`mt-1 rounded-full px-4 py-1.5 text-[14px] font-bold transition-opacity hover:opacity-90 disabled:opacity-50 ${
+              className={`mt-1 rounded-full px-4 py-1.5 text-[14px] font-medium transition-opacity hover:opacity-90 disabled:opacity-50 ${
                 isFollowing 
                   ? "bg-secondary text-secondary-foreground border border-border" 
                   : "bg-foreground text-background"
