@@ -328,7 +328,11 @@ export default function PostCard({
             <LinkPreview url={extractFirstUrl(content)!} />
           )}
 
-          {images && images.length > 0 && <ImageGrid images={images} />}
+          {images && images.length > 0 && (
+  <div onClick={(e) => e.stopPropagation()}>
+    <ImageGrid images={images} />
+  </div>
+)}
 
           {videoUrl && <VideoPlayer url={videoUrl} />}
 
