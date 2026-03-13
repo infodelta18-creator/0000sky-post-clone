@@ -21,8 +21,7 @@ const iconMap: Record<string, any> = {
 };
 
 function formatLikedCount(n: number) { 
-  if (n >= 1000) return `${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k`; 
-  return n.toString(); 
+  return n.toLocaleString(); 
 }
 
 export default function Feeds() {
@@ -91,119 +90,116 @@ export default function Feeds() {
       f.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+  const handleFeedClick = (feed: any) => {
+    navigate(`/trending/${feed.name.replace(/\s+/g, '-').toLowerCase()}`);
+  };
+
   return (
-    <div className="flex flex-col bg-background min-h-screen pb-20">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/95 px-4 py-2 backdrop-blur-md">
-        <div className="flex items-center gap-6">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="p-1 -ml-1 hover:bg-accent rounded-full transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-foreground" />
+    <div className="flex flex-col bg-background min-h-screen">
+      {/* Header - একদম ক্লিন এবং চিকন বর্ডার */}
+      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-background/95 px-4 py-2.5 backdrop-blur-md">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="p-1 -ml-1">
+            <ArrowLeft className="h-6 w-6 text-slate-900" />
           </button>
-          <h2 className="text-[19px] font-black tracking-tight">{t("nav.feeds")}</h2>
+          <h2 className="text-[18px] font-bold tracking-tight">Feeds</h2>
         </div>
-        <button 
-          onClick={() => navigate("/feeds/settings")} 
-          className="p-1 hover:bg-accent rounded-full transition-colors"
-        >
-          <Settings className="h-5 w-5 text-muted-foreground" />
+        <button onClick={() => navigate("/feeds/settings")} className="p-1">
+          <Settings className="h-6 w-6 text-slate-500" />
         </button>
       </div>
 
-      {/* Section: My Feeds Header */}
-      <div className="flex items-center gap-4 px-4 py-5">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
-          <ListFilter className="h-6 w-6 text-primary" strokeWidth={2.5} />
+      {/* "My Feeds" Section Header */}
+      <div className="flex items-center gap-4 px-4 py-6 border-b border-slate-100">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-primary">
+          <ListFilter className="h-6 w-6" strokeWidth={2.5} />
         </div>
-        <div className="flex-1">
-          <h3 className="text-[18px] font-extrabold text-foreground leading-tight">{t("feeds.my_feeds")}</h3>
-          <p className="text-[14px] text-muted-foreground leading-snug">{t("feeds.my_feeds_desc")}</p>
+        <div>
+          <h3 className="text-[20px] font-bold text-slate-900 leading-none">My Feeds</h3>
+          <p className="text-[15px] text-slate-500 mt-1">All the feeds you've saved, right in one place.</p>
         </div>
       </div>
 
-      {/* My Feeds List */}
+      {/* My Feeds List - আইকনগুলো এখন নির্দিষ্ট রঙে */}
       <div className="flex flex-col">
         {myFeeds.map((feed: any) => { 
           const Icon = iconMap[feed.icon] || Compass; 
           return (
             <button 
               key={feed.id} 
-              className="flex w-full items-center gap-4 px-4 py-3.5 hover:bg-accent/50 transition-colors border-b border-slate-100 dark:border-slate-800"
+              onClick={() => handleFeedClick(feed)}
+              className="flex w-full items-center gap-4 px-4 py-4 hover:bg-slate-50 transition-colors border-b border-slate-50"
             >
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${feed.color} text-white shadow-sm`}>
-                <Icon className="h-5 w-5" strokeWidth={2.5} />
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${feed.color || 'bg-primary'} text-white shadow-sm`}>
+                <Icon className="h-6 w-6" strokeWidth={2} />
               </div>
-              <span className="flex-1 text-left text-[16px] font-bold text-foreground">{feed.name}</span>
-              <ChevronRight className="h-5 w-5 text-slate-300" strokeWidth={3} />
+              <span className="flex-1 text-left text-[16px] font-bold text-slate-900">{feed.name}</span>
+              <ChevronRight className="h-5 w-5 text-slate-300" strokeWidth={2} />
             </button>
           ); 
         })}
       </div>
 
-      {/* Discover Section Header */}
-      <div className="px-4 pt-8 pb-4">
-        <div className="flex items-center gap-4 mb-5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/60">
-            <ListFilter className="h-6 w-6 text-primary" strokeWidth={2.5} />
+      {/* Discover Section - স্পেসিং ঠিক করা হয়েছে */}
+      <div className="px-4 pt-10 pb-6">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-primary">
+            <ListFilter className="h-6 w-6" strokeWidth={2.5} />
           </div>
-          <div>
-            <h3 className="text-[18px] font-extrabold text-foreground leading-tight">Discover New Feeds</h3>
-            <p className="text-[14px] text-muted-foreground leading-snug">{t("feeds.discover_desc")}</p>
+          <div className="flex-1">
+            <h3 className="text-[20px] font-bold text-slate-900 leading-tight">Discover New Feeds</h3>
+            <p className="text-[15px] text-slate-500 mt-1 leading-snug">Choose your own timeline! Feeds built by the community help you find content you love.</p>
           </div>
         </div>
         
-        {/* Search Input */}
-        <div className="relative mb-2">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        {/* Search Bar - অরিজিনাল bsky স্টাইল */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
           <input 
             placeholder="Search feeds" 
             value={searchQuery} 
             onChange={(e) => setSearchQuery(e.target.value)} 
-            className="w-full h-10 pl-10 pr-4 rounded-full bg-slate-100 dark:bg-slate-900 border-none text-[15px] focus:ring-1 focus:ring-primary/40 outline-none placeholder:text-muted-foreground" 
+            className="w-full h-11 pl-12 pr-4 rounded-xl bg-slate-100 border-none text-[16px] focus:ring-0 outline-none placeholder:text-slate-400" 
           />
         </div>
       </div>
 
       {/* Discover Feeds List */}
-      <div className="flex flex-col border-t border-slate-100 dark:border-slate-800">
+      <div className="flex flex-col border-t border-slate-100">
         {discoverFeeds.map((feed: any) => { 
           const Icon = iconMap[feed.icon] || Compass; 
           return (
-            <div key={feed.id} className="px-4 py-4 border-b border-slate-100 dark:border-slate-800 hover:bg-accent/30 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${feed.color} text-white shadow-sm`}>
-                  <Icon className="h-5 w-5" strokeWidth={2.5} />
+            <div key={feed.id} className="px-4 py-5 border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+              <div className="flex items-start gap-4">
+                <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${feed.color || 'bg-slate-800'} text-white`}>
+                  <Icon className="h-7 w-7" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex flex-col min-w-0">
-                      <p className="font-extrabold text-[16px] text-foreground leading-tight hover:underline cursor-pointer truncate">{feed.name}</p>
-                      <p className="text-[13px] text-muted-foreground mt-0.5 truncate">
-                        Feed by <span className="hover:underline">@{feed.author_handle}</span>
+                  <div className="flex items-start justify-between">
+                    <div className="flex flex-col min-w-0" onClick={() => handleFeedClick(feed)}>
+                      <p className="font-bold text-[17px] text-slate-900 leading-tight hover:underline cursor-pointer truncate">{feed.name}</p>
+                      <p className="text-[14px] text-slate-500 mt-0.5 truncate">
+                        Feed by @{feed.author_handle}
                       </p>
                     </div>
-                    {/* Bsky Styled Pin Button */}
+                    {/* সলিড ব্লু পিন বাটন - একদম স্ক্রিনশটের মতো */}
                     <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8 rounded-full border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 font-bold text-[13px] px-3.5 transition-all flex-shrink-0" 
-                      onClick={() => pinFeedMutation.mutate(feed.id)}
+                      className="h-9 rounded-full bg-[#0085ff] text-white hover:bg-[#0070d6] font-bold text-[14px] px-4 shadow-sm border-none flex-shrink-0" 
+                      onClick={(e) => { e.stopPropagation(); pinFeedMutation.mutate(feed.id); }}
                     >
-                      <Pin className="h-3.5 w-3.5 mr-1.5" fill="currentColor" />
-                      Pin Feed
+                      <Pin className="h-4 w-4 mr-1.5" fill="currentColor" />
+                      Pin feed
                     </Button>
                   </div>
                   
                   {feed.description && (
-                    <p className="mt-2 text-[14px] leading-snug text-foreground/90 break-words line-clamp-3">
+                    <p className="mt-2 text-[15px] leading-snug text-slate-700 font-normal break-words line-clamp-3">
                       {feed.description}
                     </p>
                   )}
                   
                   {feed.liked_count > 0 && (
-                    <p className="mt-2.5 text-[13px] font-medium text-slate-500">
+                    <p className="mt-2 text-[14px] font-medium text-slate-500">
                       Liked by {formatLikedCount(feed.liked_count)} users
                     </p>
                   )}
@@ -212,15 +208,8 @@ export default function Feeds() {
             </div>
           ); 
         })}
-        
-        {discoverFeeds.length === 0 && (
-          <div className="py-16 text-center">
-            <p className="text-muted-foreground text-sm font-medium">
-              {searchQuery ? t("feeds.no_match") : t("feeds.all_saved")}
-            </p>
-          </div>
-        )}
       </div>
+      <div className="h-20" /> {/* বটম নেভিগেশন গ্যাপ */}
     </div>
   );
 }
