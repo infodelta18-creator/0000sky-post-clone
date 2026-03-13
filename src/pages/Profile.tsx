@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import FollowListDialog from "@/components/FollowListDialog";
+import MutualFollowersIndicator from "@/components/MutualFollowersIndicator";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useLiveViewerCount, useLiveViewerPresence } from "@/hooks/use-live-viewers";
