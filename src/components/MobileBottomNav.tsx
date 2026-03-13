@@ -1,47 +1,16 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { Home, Search, MessageCircleMore, Bell } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 
-// --- Bluesky 100% Accurate Bottom Nav Icons ---
-
-const BskyHome = (props: any) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M12 3l9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10L12 3z"></path>
-  </svg>
-);
-
-const BskySearch = (props: any) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <circle cx="11" cy="11" r="8"></circle>
-    <path d="M21 21l-4.35-4.35"></path>
-  </svg>
-);
-
-const BskyChat = (props: any) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8c-1.3 0-2.6-.3-3.7-.8l-3.8 1.1a1 1 0 0 1-1.2-1.2l1.1-3.8A8.4 8.4 0 0 1 4 12Z"></path>
-    <circle cx="8" cy="12" r="1.5" fill="currentColor" stroke="none"></circle>
-    <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"></circle>
-    <circle cx="16" cy="12" r="1.5" fill="currentColor" stroke="none"></circle>
-  </svg>
-);
-
-const BskyBell = (props: any) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-  </svg>
-);
-// --------------------------------
-
 const mobileNavItems = [
-  { label: "Home", path: "/", icon: BskyHome },
-  { label: "Search", path: "/search", icon: BskySearch },
-  { label: "Chat", path: "/messages", icon: BskyChat },
-  { label: "Notifications", path: "/notifications", icon: BskyBell },
+  { label: "Home", path: "/", icon: Home },
+  { label: "Search", path: "/search", icon: Search },
+  { label: "Chat", path: "/messages", icon: MessageCircleMore },
+  { label: "Notifications", path: "/notifications", icon: Bell },
 ];
 
 export default function MobileBottomNav() {
