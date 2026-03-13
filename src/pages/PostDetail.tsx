@@ -54,6 +54,30 @@ const BskyShare = (props: any) => (
     <path d="M4 20v-7a4 4 0 0 1 4-4h12"></path>
   </svg>
 );
+
+const BskyFilter = (props: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <circle cx="9" cy="7" r="2" />
+    <path d="M9 2v3" />
+    <path d="M9 9v13" />
+    <circle cx="15" cy="17" r="2" />
+    <path d="M15 2v13" />
+    <path d="M15 19v3" />
+  </svg>
+);
+
+const RadioActive = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="10" stroke="#0085ff" strokeWidth="2" fill="none"/>
+    <circle cx="12" cy="12" r="6" fill="#0085ff"/>
+  </svg>
+);
+
+const RadioInactive = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.3"/>
+  </svg>
+);
 // --------------------------------
 
 export default function PostDetail() {
@@ -66,6 +90,10 @@ export default function PostDetail() {
   const [hidden, setHidden] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+
+  // Sorting and View State
+  const [replyView, setReplyView] = useState("linear");
+  const [replySort, setReplySort] = useState("top");
 
   const { data: post } = useQuery({
     queryKey: ["post", postId],
@@ -210,14 +238,27 @@ export default function PostDetail() {
     enabled: !!user && !!postId,
   });
 
+  // Follow interaction logic
+  const { data: userFollowing = false } = useQuery({
+    queryKey: ["isFollowing", post?.author_id, user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("follows").select("id").eq("follower_id", user!.id).eq("following_id", post!.author_id).maybeSingle();
+      return !!data;
+    },
+    enabled: !!user && !!post?.author_id && post?.author_id !== user?.id,
+  });
+
   const [likedOverride, setLikedOverride] = useState<boolean | null>(null);
   const [repostedOverride, setRepostedOverride] = useState<boolean | null>(null);
   const [bookmarkedOverride, setBookmarkedOverride] = useState<boolean | null>(null);
+  const [followingOverride, setFollowingOverride] = useState<boolean | null>(null);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
 
   // Use override during mutation, otherwise trust query data
   const isLiked = likedOverride !== null ? likedOverride : userLiked;
   const isReposted = repostedOverride !== null ? repostedOverride : userReposted;
   const isBookmarked = bookmarkedOverride !== null ? bookmarkedOverride : userBookmarked;
+  const isFollowing = followingOverride !== null ? followingOverride : userFollowing;
 
   // Helper: sync like/repost state to feed caches
   const updatePostInFeedCaches = (pid: string, updater: (post: any) => any) => {
@@ -295,6 +336,22 @@ export default function PostDetail() {
     setBookmarkedOverride(null);
   };
 
+  const handleFollow = async () => {
+    if (!user || !post?.author_id) return;
+    setIsFollowLoading(true);
+    const newFollowing = !isFollowing;
+    setFollowingOverride(newFollowing);
+
+    if (newFollowing) {
+      await supabase.from("follows").insert({ follower_id: user.id, following_id: post.author_id });
+      await supabase.from("notifications").insert({ user_id: post.author_id, actor_id: user.id, type: "follow" });
+    } else {
+      await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", post.author_id);
+    }
+    await queryClient.invalidateQueries({ queryKey: ["isFollowing", post.author_id] });
+    setIsFollowLoading(false);
+  };
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
     toast.success("Link copied!");
@@ -306,32 +363,99 @@ export default function PostDetail() {
 
   const profile = post.profiles as any;
 
+  // Sorting logic based on selected state
+  const sortedReplies = [...replies].sort((a, b) => {
+    if (replySort === "top") {
+      return b.likeCount - a.likeCount;
+    }
+    if (replySort === "newest") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+    // oldest (default)
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  });
+
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background/95 px-4 py-1.5 backdrop-blur-sm">
-        <button onClick={() => navigate(-1)} className="rounded-full p-1.5 transition-colors bsky-hover">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <h2 className="text-lg font-bold">{t("detail.post")}</h2>
+      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/95 px-4 py-1.5 backdrop-blur-sm">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="rounded-full p-1.5 transition-colors bsky-hover">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h2 className="text-lg font-bold">{t("detail.post")}</h2>
+        </div>
+
+        {/* 3 Dots / Filter Option Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="rounded-full p-1.5 transition-colors text-muted-foreground hover:text-foreground">
+              <BskyFilter className="h-5 w-5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-60 rounded-xl p-1 z-50 bg-background border border-border shadow-lg">
+            <div className="px-3 py-2 text-[13px] font-semibold text-muted-foreground">Show replies as</div>
+            <DropdownMenuItem onClick={() => setReplyView("linear")} className="flex items-center justify-between cursor-pointer rounded-md px-3 py-2.5 outline-none focus:bg-accent focus:text-accent-foreground">
+              <span className="text-[15px] font-medium">Linear</span>
+              {replyView === "linear" ? <RadioActive /> : <RadioInactive />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setReplyView("threaded")} className="flex items-center justify-between cursor-pointer rounded-md px-3 py-2.5 outline-none focus:bg-accent focus:text-accent-foreground">
+              <span className="text-[15px] font-medium">Threaded</span>
+              {replyView === "threaded" ? <RadioActive /> : <RadioInactive />}
+            </DropdownMenuItem>
+
+            <div className="my-1.5 h-px bg-border/50" />
+
+            <div className="px-3 py-2 text-[13px] font-semibold text-muted-foreground">Reply sorting</div>
+            <DropdownMenuItem onClick={() => setReplySort("top")} className="flex items-center justify-between cursor-pointer rounded-md px-3 py-2.5 outline-none focus:bg-accent focus:text-accent-foreground">
+              <span className="text-[15px] font-medium">Top replies first</span>
+              {replySort === "top" ? <RadioActive /> : <RadioInactive />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setReplySort("oldest")} className="flex items-center justify-between cursor-pointer rounded-md px-3 py-2.5 outline-none focus:bg-accent focus:text-accent-foreground">
+              <span className="text-[15px] font-medium">Oldest replies first</span>
+              {replySort === "oldest" ? <RadioActive /> : <RadioInactive />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setReplySort("newest")} className="flex items-center justify-between cursor-pointer rounded-md px-3 py-2.5 outline-none focus:bg-accent focus:text-accent-foreground">
+              <span className="text-[15px] font-medium">Newest replies first</span>
+              {replySort === "newest" ? <RadioActive /> : <RadioInactive />}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Main Post */}
       <div className="px-4 py-3 bsky-divider">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12 cursor-pointer" onClick={() => navigate(`/profile/${profile?.username}`)}>
-            <AvatarImage src={profile?.avatar_url} />
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              {profile?.display_name?.[0]?.toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-bold flex items-center gap-1">
-              {profile?.display_name}
-              <VerifiedBadge userId={post.author_id} />
-            </p>
-            <p className="text-sm text-muted-foreground">@{profile?.username}</p>
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-12 w-12 cursor-pointer" onClick={() => navigate(`/profile/${profile?.username}`)}>
+              <AvatarImage src={profile?.avatar_url} />
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {profile?.display_name?.[0]?.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-bold flex items-center gap-1">
+                {profile?.display_name}
+                <VerifiedBadge userId={post.author_id} />
+              </p>
+              <p className="text-sm text-muted-foreground">@{profile?.username}</p>
+            </div>
           </div>
+
+          {/* Follow Button */}
+          {user && post.author_id !== user.id && (
+            <button
+              onClick={handleFollow}
+              disabled={isFollowLoading}
+              className={`mt-1 rounded-full px-4 py-1.5 text-[14px] font-bold transition-opacity hover:opacity-90 disabled:opacity-50 ${
+                isFollowing 
+                  ? "bg-secondary text-secondary-foreground border border-border" 
+                  : "bg-foreground text-background"
+              }`}
+            >
+              {isFollowing ? "Following" : "Follow"}
+            </button>
+          )}
         </div>
 
         <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-relaxed">
@@ -467,7 +591,7 @@ export default function PostDetail() {
       </div>
 
       {/* Replies */}
-      {replies.map((reply) => (
+      {sortedReplies.map((reply) => (
         <PostCard key={reply.id} {...reply} />
       ))}
 
