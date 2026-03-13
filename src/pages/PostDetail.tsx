@@ -450,7 +450,7 @@ export default function PostDetail() {
             <button
               onClick={handleFollow}
               disabled={isFollowLoading}
-              className={`mt-1 rounded-full px-4 py-1.5 text-[14px] font-medium transition-opacity hover:opacity-90 disabled:opacity-50 ${
+              className={`mt-1 rounded-full px-4 py-1.5 text-[14px] font-normal transition-opacity hover:opacity-90 disabled:opacity-50 ${
                 isFollowing 
                   ? "bg-secondary text-secondary-foreground border border-border" 
                   : "bg-foreground text-background"
