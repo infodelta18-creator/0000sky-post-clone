@@ -6,19 +6,19 @@ import { useNavigate } from "react-router-dom";
 import AwajLogo from "@/components/AwajLogo";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 
-// --- Bluesky Style Custom Hash Icon ---
+// --- Bluesky Official Style Custom Hash Icon ---
 const BskyHashtag = (props: any) => (
   <svg 
     viewBox="0 0 24 24" 
     fill="none" 
     stroke="currentColor" 
-    strokeWidth="3.2" 
+    strokeWidth="3.2" /* ব্লু-স্কাইয়ের প্রমিয়াম বোল্ডনেস */
     strokeLinecap="round" 
     strokeLinejoin="round" 
     {...props}
   >
-    <line x1="4.5" y1="9" x2="19.5" y2="9" />
-    <line x1="4.5" y1="15" x2="19.5" y2="15" />
+    <line x1="4" y1="9" x2="20" y2="9" />
+    <line x1="4" y1="15" x2="20" y2="15" />
     <line x1="10" y1="3" x2="8" y2="21" />
     <line x1="16" y1="3" x2="14" y2="21" />
   </svg>
@@ -40,7 +40,7 @@ export default function MobileTopBar() {
         <AwajLogo className="h-8 w-8" />
 
         <button onClick={() => navigate("/feeds")} className="p-0">
-          {/* শুধুমাত্র এই অংশটুকু পরিবর্তন করা হয়েছে */}
+          {/* লুসিডের Hash সরিয়ে ব্লু-স্কাই স্টাইল আইকন বসানো হয়েছে, সাইজ ব্যালেন্স করা হয়েছে */}
           <BskyHashtag className="h-[21px] w-[21px] text-muted-foreground" />
         </button>
       </header>
