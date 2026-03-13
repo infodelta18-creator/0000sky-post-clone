@@ -6,21 +6,22 @@ import { useNavigate } from "react-router-dom";
 import AwajLogo from "@/components/AwajLogo";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 
-// --- Bluesky Official Style Custom Hash Icon ---
+// --- Bluesky Exact Proportion Hash Icon ---
 const BskyHashtag = (props: any) => (
   <svg 
     viewBox="0 0 24 24" 
     fill="none" 
     stroke="currentColor" 
-    strokeWidth="3.2" /* ব্লু-স্কাইয়ের প্রমিয়াম বোল্ডনেস */
+    strokeWidth="2" /* হ্যামবার্গার মেনুর সমান थিকনেস, মোটেও বোল্ড নয় */
     strokeLinecap="round" 
     strokeLinejoin="round" 
     {...props}
   >
-    <line x1="4" y1="9" x2="20" y2="9" />
-    <line x1="4" y1="15" x2="20" y2="15" />
-    <line x1="10" y1="3" x2="8" y2="21" />
-    <line x1="16" y1="3" x2="14" y2="21" />
+    {/* কম ছড়ানো এবং নিখুঁত স্ল্যান্ট (Slant) অ্যাঙ্গেল */}
+    <line x1="5" y1="9" x2="19" y2="9" />
+    <line x1="5" y1="15" x2="19" y2="15" />
+    <line x1="11" y1="4" x2="9" y2="20" />
+    <line x1="15" y1="4" x2="13" y2="20" />
   </svg>
 );
 
@@ -40,8 +41,8 @@ export default function MobileTopBar() {
         <AwajLogo className="h-8 w-8" />
 
         <button onClick={() => navigate("/feeds")} className="p-0">
-          {/* লুসিডের Hash সরিয়ে ব্লু-স্কাই স্টাইল আইকন বসানো হয়েছে, সাইজ ব্যালেন্স করা হয়েছে */}
-          <BskyHashtag className="h-[21px] w-[21px] text-muted-foreground" />
+          {/* হ্যামবার্গার মেনুর সাইজ (h-6 w-6) এর সাথে সমান রাখা হয়েছে */}
+          <BskyHashtag className="h-6 w-6 text-muted-foreground" />
         </button>
       </header>
 
