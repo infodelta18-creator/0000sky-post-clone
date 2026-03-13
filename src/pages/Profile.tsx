@@ -421,7 +421,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <h1 className="mt-2 text-[22px] font-extrabold leading-tight flex items-center gap-1">
+        <h1 className="mt-2 text-[22px] font-extrabold leading-tight flex items-center gap-0.6">
           {profile.display_name}
           <VerifiedBadge userId={profile.id} />
         </h1>
