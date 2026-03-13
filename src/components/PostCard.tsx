@@ -294,7 +294,7 @@ export default function PostCard({
               className="hover:underline cursor-pointer"
               onClick={(e) => { e.stopPropagation(); navigate(`/profile/${repostedBy.username}`); }}
             >
-              Reposted by {repostedBy.username === authorHandle && authorId === user?.id ? "you" : `@${repostedBy.username}`}
+              Reposted by {repostedBy.username === (window.location.pathname.split("/").pop()) ? "you" : `@${repostedBy.username}`}
             </span>
           </div>
         )}
