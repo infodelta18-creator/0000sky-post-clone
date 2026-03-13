@@ -89,14 +89,13 @@ export default function MobileBottomNav() {
         if (isActive) {
           if (label === "Home") {
             iconFill = "currentColor";
-            // হোমের মাঝখানের দরজার অংশটি ব্যাকগ্রাউন্ড কালার দিয়ে ফাঁকা (cutout) করা হয়েছে
-            customClass = " [&>*:last-child]:fill-background [&>*:last-child]:stroke-background";
+            customClass = " [&>path]:!fill-current [&>polyline]:!fill-background [&>polyline]:!stroke-background";
           } else if (label === "Chat") {
             iconFill = "currentColor";
-            customClass = " [&>path:not(:first-child)]:stroke-background [&>path:not(:first-child)]:fill-background";
+            customClass = " [&>path:not(:first-child)]:!stroke-background [&>path:not(:first-child)]:!fill-background";
           } else if (label === "Notifications") {
             iconFill = "currentColor";
-            customClass = " [&>path:last-child]:fill-none";
+            customClass = " [&>path:last-child]:!fill-none";
           }
         }
 
@@ -104,7 +103,6 @@ export default function MobileBottomNav() {
           <NavLink
             key={label}
             to={path}
-            // নির্দেশ অনুযায়ী সব সময় সলিড কালার (text-foreground) রাখা হয়েছে
             className="flex flex-col items-center gap-0.5 px-3 py-1 text-foreground"
           >
             <div className="relative flex items-center justify-center">
@@ -113,7 +111,6 @@ export default function MobileBottomNav() {
                 strokeWidth={2.25}
                 fill={iconFill}
               />
-              {/* সার্চ আইকনের ভেতরের বড় ডট (h-[8px] w-[8px]) */}
               {isActive && label === "Search" && (
                 <div className="absolute left-[11px] top-[11px] h-[8px] w-[8px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-current" />
               )}
@@ -131,9 +128,10 @@ export default function MobileBottomNav() {
         to={`/profile/${profile?.username || ""}`}
         className="flex flex-col items-center gap-0.5 px-3 py-1"
       >
-        <Avatar className="h-6 w-6">
+        {/* প্রোফাইল আইকনের সাইজ অন্যান্য আইকনের সাথে ভিজ্যুয়ালি ব্যালেন্স করার জন্য h-[24px] w-[24px] করা হয়েছে */}
+        <Avatar className="h-[24px] w-[24px]">
           <AvatarImage src={profile?.avatar_url || ""} />
-          <AvatarFallback className="bg-primary text-primary-foreground text-[10px]">
+          <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-medium">
             {profile?.display_name?.[0]?.toUpperCase() || "?"}
           </AvatarFallback>
         </Avatar>
