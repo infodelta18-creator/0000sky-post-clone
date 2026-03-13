@@ -89,6 +89,8 @@ export default function MobileBottomNav() {
         if (isActive) {
           if (label === "Home") {
             iconFill = "currentColor";
+            // হোমের মাঝখানের দরজার অংশটি ব্যাকগ্রাউন্ড কালার দিয়ে ফাঁকা (cutout) করা হয়েছে
+            customClass = " [&>*:last-child]:fill-background [&>*:last-child]:stroke-background";
           } else if (label === "Chat") {
             iconFill = "currentColor";
             customClass = " [&>path:not(:first-child)]:stroke-background [&>path:not(:first-child)]:fill-background";
@@ -102,9 +104,8 @@ export default function MobileBottomNav() {
           <NavLink
             key={label}
             to={path}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 ${
-              isActive ? "text-foreground" : "text-muted-foreground"
-            }`}
+            // নির্দেশ অনুযায়ী সব সময় সলিড কালার (text-foreground) রাখা হয়েছে
+            className="flex flex-col items-center gap-0.5 px-3 py-1 text-foreground"
           >
             <div className="relative flex items-center justify-center">
               <Icon
@@ -112,8 +113,9 @@ export default function MobileBottomNav() {
                 strokeWidth={2.25}
                 fill={iconFill}
               />
+              {/* সার্চ আইকনের ভেতরের বড় ডট (h-[8px] w-[8px]) */}
               {isActive && label === "Search" && (
-                <div className="absolute left-[10px] top-[10px] h-[5px] w-[5px] rounded-full bg-current" />
+                <div className="absolute left-[11px] top-[11px] h-[8px] w-[8px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-current" />
               )}
               {badge > 0 && (
                 <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
