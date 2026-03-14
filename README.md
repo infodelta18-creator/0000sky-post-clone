@@ -25,10 +25,10 @@ A modern, real-time social media application built with React, TypeScript, and T
 
 ```sh
 # Clone the repository
-git clone <YOUR_GIT_URL>
+git clone https://github.com/raselshikdar/sky-post-clone
 
 # Navigate to the project directory
-cd <YOUR_PROJECT_NAME>
+cd sky-post-clone
 
 # Install dependencies
 npm install
