@@ -2,7 +2,7 @@
 
 A modern, real-time social media application built with React, TypeScript, and Tailwind CSS.
 
-> **Disclaimer:** *This project is an independent, educational clone inspired by the UI/UX of BlueSky. It is not affiliated with, endorsed by, or connected to BlueSky in any way. All source code is originally developed.*
+> ***Disclaimer:** This project is an independent, educational clone inspired by the UI/UX of BlueSky. It is not affiliated with, endorsed by, or connected to BlueSky in any way. All source code is originally developed.*
 
 ## Features
 
@@ -29,7 +29,7 @@ A modern, real-time social media application built with React, TypeScript, and T
 
 ```sh
 # Clone the repository
-git clone [https://github.com/raselshikdar/sky-post-clone](https://github.com/raselshikdar/sky-post-clone)
+git clone https://github.com/raselshikdar/sky-post-clone
 
 # Navigate to the project directory
 cd sky-post-clone
@@ -41,7 +41,7 @@ npm install
 npm run dev
 ```
 
-# Project Structure
+## Project Structure
 
 ```text
 src/
