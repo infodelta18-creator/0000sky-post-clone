@@ -135,7 +135,7 @@ const App = () => (
                 <Route path="/messages/settings" element={<ChatSettings />} />
                 <Route path="/messages/:conversationId" element={<Conversation />} />
                 <Route path="/support" element={<SupportTicketForm />} />
-                <Route path="/feedback" element={<FeedbackPage />} />
+                
                 <Route path="/downloads" element={<Downloads />} />
                 <Route path="/verification/apply" element={<VerificationApply />} />
               </Route>
