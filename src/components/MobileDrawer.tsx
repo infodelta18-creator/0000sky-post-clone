@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, Search, MessageCircle, Bell, Hash, List, Bookmark, User, Settings, Moon, Sun, ShieldCheck, LogOut } from "lucide-react";
+import { Home, Search, MessageCircle, Bell, Hash, List, Bookmark, User, Settings, Moon, Sun, ShieldCheck, LogOut, Download } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -126,12 +126,12 @@ export default function MobileDrawer({ open, onOpenChange }: MobileDrawerProps) 
         </nav>
 
         <div className="border-t border-border" />
-        <div className="flex items-center gap-1.5 px-5 py-1.5">
-          <NavLink to="/feedback" onClick={() => onOpenChange(false)} className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-sm text-foreground hover:bg-accent">
-            <MessageCircle className="h-3.5 w-3.5" /> {t("drawer.feedback")}
+        <div className="flex items-center justify-between px-5 py-1.5">
+          <NavLink to="/support" onClick={() => onOpenChange(false)} className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-sm text-foreground hover:bg-accent">
+            <MessageCircle className="h-3.5 w-3.5" /> {t("drawer.help_feedback")}
           </NavLink>
-          <NavLink to="/support" onClick={() => onOpenChange(false)} className="rounded-full border border-border px-2.5 py-1 text-sm text-foreground hover:bg-accent">
-            {t("settings.help")}
+          <NavLink to="/downloads" onClick={() => onOpenChange(false)} className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-sm text-foreground hover:bg-accent">
+            <Download className="h-3.5 w-3.5" /> App
           </NavLink>
         </div>
       </SheetContent>
