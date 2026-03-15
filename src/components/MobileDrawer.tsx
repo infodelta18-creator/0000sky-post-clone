@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, Search, MessageCircle, Bell, Hash, List, Bookmark, User, Settings, Moon, Sun, ShieldCheck, LogOut } from "lucide-react";
+import { Home, Search, MessageCircle, Bell, Hash, List, Bookmark, User, Settings, Moon, Sun, ShieldCheck, LogOut, Download } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
