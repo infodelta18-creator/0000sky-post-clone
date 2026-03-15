@@ -6,6 +6,7 @@ import RightSidebar from "@/components/RightSidebar";
 import { useState } from "react";
 import { SquarePen } from "lucide-react";
 import Composer from "@/components/Composer";
+import LiveChatFAB from "@/components/LiveChatFAB";
 
 interface AppLayoutProps {
   homeOverride?: React.ReactNode;
