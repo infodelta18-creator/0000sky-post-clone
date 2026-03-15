@@ -31,7 +31,9 @@ export default function AppLayout({ homeOverride }: AppLayoutProps = {}) {
 
       <RightSidebar />
 
-      {!isMessagesPage && (
+      {pathname === "/support" ? (
+        <LiveChatFAB />
+      ) : !isMessagesPage && (
         <button
           className="fab-button"
           onClick={() => setComposerOpen(true)}
