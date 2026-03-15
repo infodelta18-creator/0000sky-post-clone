@@ -43,7 +43,6 @@ import LandingPage from "@/pages/LandingPage";
 import PublicFeed from "@/pages/PublicFeed";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import FeedbackPage from "@/pages/FeedbackPage";
 import Downloads from "@/pages/Downloads";
 
 const queryClient = new QueryClient({
