@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { MoreHorizontal, Languages, Copy, BellOff, Filter, EyeOff, VolumeX, UserX, AlertTriangle, Pin, PinOff, Trash2, SmilePlus, Frown } from "lucide-react";
+import { MoreHorizontal, Languages, Copy, BellOff, Filter, EyeOff, VolumeX, UserX, AlertTriangle, Pin, PinOff, Trash2, Settings } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "@/i18n/LanguageContext";
 import MuteWordsDialog from "@/components/MuteWordsDialog";
+import InteractionSettings from "@/components/InteractionSettings";
 
 interface PostCardMenuProps {
   postId: string;
@@ -20,13 +20,13 @@ interface PostCardMenuProps {
 export default function PostCardMenu({ postId, authorId, authorHandle, content, onHide }: PostCardMenuProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const isOwner = user?.id === authorId;
   const { t } = useTranslation();
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [muteWordsOpen, setMuteWordsOpen] = useState(false);
+  const [interactionOpen, setInteractionOpen] = useState(false);
 
   const { data: isPinned } = useQuery({
     queryKey: ["isPinned", postId, user?.id],
@@ -40,33 +40,11 @@ export default function PostCardMenu({ postId, authorId, authorHandle, content, 
 
   const handleTranslate = async (e: React.MouseEvent) => {
     stop(e);
-    try {
-      const translated = await new Promise<string>((resolve) => {
-        // Use browser's built-in or simple copy approach
-        navigator.clipboard.writeText(content);
-        toast.success(t("menu.translate_copied"));
-        resolve(content);
-      });
-    } catch {
-      toast.error("Translation failed");
-    }
+    navigator.clipboard.writeText(content);
+    toast.success(t("menu.translate_copied"));
   };
 
   const handleCopy = (e: React.MouseEvent) => { stop(e); navigator.clipboard.writeText(content); toast.success(t("menu.post_text_copied")); };
-
-  const handleShowMore = async (e: React.MouseEvent) => {
-    stop(e); if (!user) return;
-    const { error } = await supabase.from("content_preferences").upsert({ user_id: user.id, post_id: postId, preference: "more" }, { onConflict: "user_id,post_id" });
-    if (error) { toast.error("Failed to save preference"); return; }
-    toast.success(t("menu.show_more_saved"));
-  };
-
-  const handleShowLess = async (e: React.MouseEvent) => {
-    stop(e); if (!user) return;
-    const { error } = await supabase.from("content_preferences").upsert({ user_id: user.id, post_id: postId, preference: "less" }, { onConflict: "user_id,post_id" });
-    if (error) { toast.error("Failed to save preference"); return; }
-    toast.success(t("menu.show_less_saved"));
-  };
 
   const handleDelete = async (e: React.MouseEvent) => {
     stop(e); if (!user || !isOwner) return;
@@ -106,6 +84,12 @@ export default function PostCardMenu({ postId, authorId, authorHandle, content, 
     stop(e);
     setMenuOpen(false);
     setTimeout(() => setMuteWordsOpen(true), 150);
+  };
+
+  const handleInteractionSettings = (e: React.MouseEvent) => {
+    stop(e);
+    setMenuOpen(false);
+    setTimeout(() => setInteractionOpen(true), 150);
   };
 
   const handleHidePost = async (e: React.MouseEvent) => {
@@ -150,6 +134,10 @@ export default function PostCardMenu({ postId, authorId, authorHandle, content, 
     );
   };
 
+  const handleInteractionSave = () => {
+    toast.success("Interaction settings saved");
+  };
+
   return (
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
@@ -165,25 +153,24 @@ export default function PostCardMenu({ postId, authorId, authorHandle, content, 
         <DropdownMenuContent align="end" className="w-56 z-50 bg-background border border-border shadow-lg">
           {isOwner ? (
             <>
-              {menuItem(t("menu.translate"), Languages, handleTranslate)}
-              {menuItem(t("menu.copy_text"), Copy, handleCopy)}
-              <DropdownMenuSeparator />
               {isPinned
                 ? menuItem("Unpin from profile", PinOff, handleUnpin)
                 : menuItem(t("menu.pin_profile"), Pin, handlePin)
               }
               <DropdownMenuSeparator />
-              {menuItem(t("menu.mute_thread"), BellOff, handleMuteThread)}
+              {menuItem(t("menu.translate"), Languages, handleTranslate)}
+              {menuItem(t("menu.copy_text"), Copy, handleCopy)}
               <DropdownMenuSeparator />
+              {menuItem(t("menu.mute_thread"), BellOff, handleMuteThread)}
+              {menuItem(t("menu.mute_words"), Filter, handleMuteWords)}
+              <DropdownMenuSeparator />
+              {menuItem("Edit interaction settings", Settings, handleInteractionSettings)}
               {menuItem(t("menu.delete_post"), Trash2, handleDelete, true)}
             </>
           ) : (
             <>
               {menuItem(t("menu.translate"), Languages, handleTranslate)}
               {menuItem(t("menu.copy_text"), Copy, handleCopy)}
-              <DropdownMenuSeparator />
-              {menuItem(t("menu.show_more"), SmilePlus, handleShowMore)}
-              {menuItem(t("menu.show_less"), Frown, handleShowLess)}
               <DropdownMenuSeparator />
               {menuItem(t("menu.mute_thread"), BellOff, handleMuteThread)}
               {menuItem(t("menu.mute_words"), Filter, handleMuteWords)}
@@ -199,6 +186,12 @@ export default function PostCardMenu({ postId, authorId, authorHandle, content, 
       </DropdownMenu>
 
       <MuteWordsDialog open={muteWordsOpen} onOpenChange={setMuteWordsOpen} />
+      <InteractionSettings
+        open={interactionOpen}
+        onOpenChange={setInteractionOpen}
+        postId={postId}
+        onSave={handleInteractionSave}
+      />
     </>
   );
 }
