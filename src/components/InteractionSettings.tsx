@@ -57,6 +57,22 @@ export default function InteractionSettings({ open, onOpenChange, postId, onSave
 
   const handleSave = async () => {
     if (!user) return;
+
+    // If no postId (new post from Composer), just return label without DB save
+    if (!postId) {
+      let label = "Anyone can interact";
+      if (whoCanReply === "nobody") {
+        const extras: string[] = [];
+        if (yourFollowers) extras.push("followers");
+        if (peopleYouFollow) extras.push("following");
+        if (peopleYouMention) extras.push("mentioned");
+        label = extras.length > 0 ? `${extras.join(", ")} can reply` : "Nobody can reply";
+      }
+      onSave(label);
+      onOpenChange(false);
+      return;
+    }
+
     setSaving(true);
 
     const payload = {
