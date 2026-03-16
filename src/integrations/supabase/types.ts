@@ -1116,6 +1116,53 @@ export type Database = {
           },
         ]
       }
+      post_interaction_settings: {
+        Row: {
+          allow_followers: boolean
+          allow_following: boolean
+          allow_mentioned: boolean
+          allow_quote_posts: boolean
+          created_at: string
+          id: string
+          post_id: string
+          updated_at: string
+          user_id: string
+          who_can_reply: string
+        }
+        Insert: {
+          allow_followers?: boolean
+          allow_following?: boolean
+          allow_mentioned?: boolean
+          allow_quote_posts?: boolean
+          created_at?: string
+          id?: string
+          post_id: string
+          updated_at?: string
+          user_id: string
+          who_can_reply?: string
+        }
+        Update: {
+          allow_followers?: boolean
+          allow_following?: boolean
+          allow_mentioned?: boolean
+          allow_quote_posts?: boolean
+          created_at?: string
+          id?: string
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+          who_can_reply?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_interaction_settings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           author_id: string
