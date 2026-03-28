@@ -2,7 +2,7 @@ import { ArrowLeft, Download, Smartphone, Shield, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-const APK_URL = "https://github.com/raselshikdar/sky-post-clone/releases/download/v1.2.0/Awaj.v1.2.0.apk";
+const APK_URL = "https://linkin.bio/netlivy";
 
 export default function Downloads() {
   const navigate = useNavigate();
